@@ -9,6 +9,12 @@
 
 ---
 
+## 🌐 Live Interactive Web Demo
+**Live Website**: [https://namansingh68.github.io/cloud-based-file-storage-system/](https://namansingh68.github.io/cloud-based-file-storage-system/)  
+*(Hosted directly on GitHub Pages via GitHub Actions with full in-browser interactive demo mode)*
+
+---
+
 ## 📌 Project Overview
 A full-stack, self-hosted, privacy-focused alternative to proprietary cloud storage services (Google Drive, Dropbox) engineered per the approved **SRS & SDS Specification Report**.
 
