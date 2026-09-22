@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+dist/
+frontend/node_modules/
+frontend/dist/
+
+# Maven / Java Build Outputs
+target/
+backend/target/
+*.class
+.mvn/timing.properties
+
+# Application Database & Uploads
+backend/data/
+backend/storage_uploads/
+*.db
+*.log
+
+# IDE and OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
