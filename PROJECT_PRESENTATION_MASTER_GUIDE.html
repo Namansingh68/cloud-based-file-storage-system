@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Presentation & Viva Master Guide - Secure Cloud File Storage</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 14mm 14mm 14mm 14mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.55;
+    font-size: 11pt;
+  }
+
+  .header {
+    border-bottom: 3px solid #3b82f6;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .header h1 {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .header .sub {
+    font-size: 10pt;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-primary { background: #dbeafe; color: #1d4ed8; }
+  .badge-success { background: #dcfce7; color: #15803d; }
+  .badge-warning { background: #fef3c7; color: #b45309; }
+  .badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    border-left: 4px solid #3b82f6;
+    padding-left: 8px;
+  }
+
+  h3 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  ul, ol {
+    margin-left: 20px;
+    margin-bottom: 10px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .card-highlight {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .card-warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    font-size: 9.5pt;
+  }
+
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    background: #f1f5f9;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: #0369a1;
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5pt;
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 10px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .qa-block {
+    margin-bottom: 14px;
+    border-left: 3px solid #6366f1;
+    padding-left: 10px;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .qa-q {
+    font-weight: 700;
+    color: #312e81;
+    margin-bottom: 4px;
+    font-size: 10.5pt;
+  }
+
+  .qa-a {
+    color: #334155;
+    font-size: 10pt;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .flow-num {
+    background: #3b82f6;
+    color: white;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .tip-box {
+    border-left: 4px solid #10b981;
+    background: #ecfdf5;
+    padding: 10px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: TITLE & EXECUTIVE SUMMARY -->
+<div class="header">
+  <div>
+    <h1>PROJECT PRESENTATION & VIVA MASTER GUIDE</h1>
+    <div class="sub">Secure Cloud-Based File Storage and Document Management System (AI24300 / CS24300)</div>
+  </div>
+  <div style="text-align: right;">
+    <span class="badge badge-primary">BIT Mesra</span>
+    <span class="badge badge-success">Semester V</span>
+    <div style="font-size: 8.5pt; color: #64748b; margin-top: 4px;">Jaipur Campus</div>
+  </div>
+</div>
+
+<div class="card-highlight">
+  <strong>Student Details:</strong><br>
+  • <strong>Student Name:</strong> Naman Kumar (Roll: BTECH/25170/24)<br>
+  • <strong>Project Partners:</strong> Ravinder Dhayal (BTECH/25188/24), Utkarsh Tikkiwal (BTECH/25190/24)<br>
+  • <strong>Under Supervision of:</strong> Dr. Kuntal Mukherjee | <strong>Academic Session:</strong> MO-2026<br>
+  • <strong>Live Project URL:</strong> <code>https://cloud-based-file-storage-system-six.vercel.app</code> (or your Vercel link)<br>
+  • <strong>Live Backend Swagger Docs:</strong> <code>https://cloud-based-file-storage-system-3zof.onrender.com/swagger-ui.html</code>
+</div>
+
+<h2>1. Project Overview & Motivation (What & Why?)</h2>
+<p>
+  <strong>Project Title:</strong> Secure Cloud-Based File Storage and Document Management System (CloudVault).<br>
+  <strong>Core Concept:</strong> A full-stack, self-hosted, privacy-focused alternative to proprietary cloud storage platforms like Google Drive and Dropbox. It provides enterprise-grade authentication, hierarchical folder management, cryptographic link sharing with expiration dates, real-time audit activity logging, and in-browser preview without forced downloads.
+</p>
+
+<h3>The Real-World Problem We Are Solving:</h3>
+<ul>
+  <li><strong>Privacy & Vendor Lock-In:</strong> Commercial cloud providers scan personal documents, enforce proprietary storage formats, and log sensitive user habits.</li>
+  <li><strong>Security Risks:</strong> Weak session cookies and unauthenticated public file URLs lead to data leakage and unauthorized access.</li>
+  <li><strong>Resource Constraints:</strong> Small enterprises and academic labs need a secure, lightweight document management solution that respects user-level quotas and maintains strict audit compliance.</li>
+</ul>
+
+<h3>Our Proposed Solution:</h3>
+<ul>
+  <li><strong>Zero-Trust Authentication:</strong> Stateless JWT (JSON Web Tokens) with BCrypt password hashing.</li>
+  <li><strong>Role-Based Access Control (RBAC):</strong> Clear permission boundaries (Owner, Editor, Viewer).</li>
+  <li><strong>True In-Browser Previews:</strong> Instant viewing of PDFs, PNG/JPEG images, text/code, and media without forcing file downloads to the user's hard drive.</li>
+  <li><strong>Persistent Cloud Architecture:</strong> Zero-cost deployment on Vercel (React Frontend), Render (Spring Boot Docker Backend), and Supabase (PostgreSQL Database).</li>
+</ul>
+
+<h2>2. Complete Tech Stack & Why Each Was Chosen</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Technology Used</th>
+      <th>Why We Chose It (Justification for Professor)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>React 18, Vite, Tailwind CSS v3</td>
+      <td>Virtual DOM for instant rendering, component-driven UI, zero slow builds with Vite's Rollup bundler, responsive dark/light mode with Tailwind utility classes.</td>
+    </tr>
+    <tr>
+      <td><strong>Backend</strong></td>
+      <td>Spring Boot 3.3.4, Java 17 (LTS)</td>
+      <td>Enterprise-standard robust REST architecture, Dependency Injection (IoC), Spring Security 6, declarative transactions, high throughput.</td>
+    </tr>
+    <tr>
+      <td><strong>Security</strong></td>
+      <td>Spring Security 6, JJWT 0.12.6, BCrypt</td>
+      <td>Stateless authorization via Bearer JWTs, cryptographic signing with HMAC-SHA256, adaptive password hashing with 10 salt rounds.</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>PostgreSQL (Cloud) & H2 (Local)</td>
+      <td>ACID compliant, robust foreign key relationships, dual-profile configuration (H2 in dev, managed PostgreSQL in production).</td>
+    </tr>
+    <tr>
+      <td><strong>Persistence</strong></td>
+      <td>Database-backed Binary Storage (<code>bytea</code>)</td>
+      <td>Guarantees 100% file persistence across Render free-tier sleep cycles without requiring paid S3 storage or extra subscriptions.</td>
+    </tr>
+    <tr>
+      <td><strong>API Docs</strong></td>
+      <td>SpringDoc OpenAPI 2.6.0 (Swagger)</td>
+      <td>Live interactive API testing interface at <code>/swagger-ui.html</code> conforming to industry OpenAPI 3.0 standards.</td>
+    </tr>
+    <tr>
+      <td><strong>Deployment</strong></td>
+      <td>Vercel, Render (Docker), Supabase</td>
+      <td>Modern cloud decoupling: static assets on edge CDN (Vercel), containerized microservice on Render, managed SQL on Supabase.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- PAGE 2: FUNCTIONAL REQUIREMENTS & ARCHITECTURE -->
+<div class="page-break"></div>
+<div class="header">
+  <div>
+    <h1>FUNCTIONAL REQUIREMENTS & SYSTEM ARCHITECTURE</h1>
+    <div class="sub">SRS/SDS Mapping & 3-Tier Layered Design</div>
+  </div>
+  <span class="badge badge-primary">SDS Architecture</span>
+</div>
+
+<h2>3. Functional Requirements (FR-01 to FR-19 Breakdown)</h2>
+<p>In your presentation, explain that the project strictly fulfills every single functional requirement defined in the approved SRS report:</p>
+
+<div class="grid-2">
+  <div class="card">
+    <strong>Module A: Auth & Security (FR-01 to FR-03)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-01: User Registration:</strong> Unique email, BCrypt password hashing, default 500MB quota.</li>
+      <li><strong>FR-02: User Login & JWT:</strong> Verifies credentials, returns signed HMAC-SHA256 JWT valid for 24 hours.</li>
+      <li><strong>FR-03: Session Management:</strong> Stateless Bearer token verification on every protected request.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong>Module B: File Operations (FR-04, FR-05, FR-08)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-04: File Upload:</strong> Multipart upload with 50MB size validation and storage quota deduction.</li>
+      <li><strong>FR-05: File Download:</strong> Secure streaming with <code>Content-Disposition: attachment</code>.</li>
+      <li><strong>FR-08: Drag & Drop:</strong> Canvas-wide dropzone with progress bar and multi-file handling.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <strong>Module C: Organization & Search (FR-06, FR-07, FR-12)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-06: Hierarchical Folders:</strong> Self-referencing tree structure supporting infinite nesting.</li>
+      <li><strong>FR-07: File Management:</strong> Rename, move between folders, path traversal, breadcrumb sync.</li>
+      <li><strong>FR-12: Instant Search:</strong> Real-time filtering by filename and category (Docs, Images, Media, Code).</li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong>Module D: Sharing & Access Control (FR-09 to FR-11)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-09: Share Links:</strong> Cryptographically random token generation for files/folders.</li>
+      <li><strong>FR-10: Expiration Controls:</strong> Time-bounded links (24h, 7d, 30d, or never).</li>
+      <li><strong>FR-11: Permission Levels:</strong> Configurable <code>VIEWER</code> (read-only) or <code>EDITOR</code> rights.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <strong>Module E: Previews & Recovers (FR-16, FR-17)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-16: In-Browser Preview:</strong> Embedded PDF viewer, images, text/code viewer without forcing downloads.</li>
+      <li><strong>FR-17: Trash / Recycle Bin:</strong> Two-phase delete: soft-delete with restore or permanent purge.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <strong>Module F: Governance & Docs (FR-13, FR-14, FR-18, FR-19)</strong>
+    <ul style="font-size: 9.5pt; margin-top: 4px;">
+      <li><strong>FR-13: Audit Trail:</strong> Timestamped logging of uploads, downloads, renames, and deletions.</li>
+      <li><strong>FR-14 & FR-18: Dashboard & Quota:</strong> Live storage accounting bar with warning alerts.</li>
+      <li><strong>FR-19: Swagger UI:</strong> Live interactive API testing at <code>/swagger-ui.html</code>.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>4. System Architecture & Request Lifecycle</h2>
+<p>Our project implements a classic <strong>3-Tier Layered Architecture</strong> completely decoupled for high scalability:</p>
+
+<pre>
+[ CLIENT TIER ]          [ APPLICATION / API TIER ]              [ DATABASE & STORAGE TIER ]
+React 18 + Vite SPA       Spring Boot 3.3.4 REST API              Supabase Cloud PostgreSQL
+Hosted on Vercel CDN     Containerized Docker on Render           Port 5432 (SSL Required)
+      |                              |                                      |
+      |--- 1. HTTP Request --------> |                                      |
+      |    (Bearer JWT Token)        |--- 2. AuthFilter (Verify JWT)        |
+      |                              |--- 3. Controller -> Service Layer    |
+      |                              |--- 4. Hibernate / Spring Data JPA -> |
+      |                              |                                      |--- 5. SQL Query / bytea
+      |                              |                                           (Files & Metadata)
+      | <--- 6. JSON / Stream Stream | <--- 6. Record & Binary Stream ------|
+</pre>
+
+<h3>The Life of a File Upload Request (Explain This in Viva!):</h3>
+<div class="flow-step">
+  <div class="flow-num">1</div>
+  <div><strong>User selects file in React:</strong> Drag-and-drop or file picker passes <code>File</code> object to <code>uploadFile()</code> in <code>DriveContext.jsx</code>.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">2</div>
+  <div><strong>Axios sends Multipart Request:</strong> Axios attaches <code>Authorization: Bearer &lt;JWT&gt;</code> and posts to <code>/api/files/upload?folderId=X</code>.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">3</div>
+  <div><strong>Auth Filter Interception:</strong> <code>AuthTokenFilter</code> extracts JWT, validates signature with HMAC-SHA256, and populates <code>SecurityContextHolder</code>.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">4</div>
+  <div><strong>FileController & Storage Service:</strong> Validates file size (max 50MB) and checks if <code>usedStorage + file.size &gt; storageQuota</code>. If exceeded, rejects with <code>400 Bad Request</code>.</div>
+</div>
+<div class="flow-step">
+  <div class="flow-num">5</div>
+  <div><strong>Persistence:</strong> Saves metadata to table <code>files</code>, stores binary content into table <code>file_contents</code> (as <code>bytea</code>), updates user's <code>usedStorage</code>, and records an <code>UPLOAD</code> event in <code>activity_logs</code>.</div>
+</div>
+
+<!-- PAGE 3: DATABASE DESIGN & CORE CONCEPTS -->
+<div class="page-break"></div>
+<div class="header">
+  <div>
+    <h1>DATABASE SCHEMA & CORE COMPUTER SCIENCE CONCEPTS</h1>
+    <div class="sub">Relational Modeling, Data Dictionary & Deep Theory</div>
+  </div>
+  <span class="badge badge-success">Data Model & Theory</span>
+</div>
+
+<h2>5. Database Schema Design (SDS Section 4.3)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Table Name</th>
+      <th>Key Columns & Types</th>
+      <th>Description & Relationships</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong><code>users</code></strong></td>
+      <td><code>id (PK), email (UNIQUE), password_hash, name, storage_quota, used_storage, role, created_at</code></td>
+      <td>Stores user account, BCrypt hash (hidden with <code>@JsonIgnore</code>), and current byte usage counter.</td>
+    </tr>
+    <tr>
+      <td><strong><code>folders</code></strong></td>
+      <td><code>id (PK), name, parent_id (FK self), owner_id (FK users), is_deleted, created_at</code></td>
+      <td>Hierarchical folder tree. Self-referencing <code>parent_id</code> allows infinite subfolder nesting.</td>
+    </tr>
+    <tr>
+      <td><strong><code>files</code></strong></td>
+      <td><code>id (PK), name, original_name, storage_path, size, content_type, owner_id (FK), folder_id (FK), is_deleted</code></td>
+      <td>Stores file metadata, MIME type, soft-delete state, and relational ownership.</td>
+    </tr>
+    <tr>
+      <td><strong><code>file_contents</code></strong></td>
+      <td><code>id (PK), file_id (FK files UNIQUE), data (BYTEA / @Lob)</code></td>
+      <td>Stores physical binary payload directly in PostgreSQL for 100% persistent storage.</td>
+    </tr>
+    <tr>
+      <td><strong><code>share_links</code></strong></td>
+      <td><code>id (PK), token (UNIQUE), file_id (FK), folder_id (FK), permission, expires_at, created_by (FK)</code></td>
+      <td>Stores cryptographic share tokens, access rules (<code>VIEWER</code>, <code>EDITOR</code>), and expiry timestamps.</td>
+    </tr>
+    <tr>
+      <td><strong><code>activity_logs</code></strong></td>
+      <td><code>id (PK), user_id (FK), action, target_type, target_id, target_name, details, timestamp</code></td>
+      <td>Immutable audit log capturing all file/folder operations for security and compliance.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>6. Core Theoretical Concepts Used (Must-Know for Professor)</h2>
+
+<div class="card">
+  <h3>1. JWT (JSON Web Token) Architecture:</h3>
+  <p>
+    JWT is an open standard (RFC 7519) for securely transmitting information between parties as a JSON object.
+    It contains 3 parts separated by dots: <code>Header.Payload.Signature</code>:
+  </p>
+  <ul>
+    <li><strong>Header:</strong> Specifies algorithm (e.g., <code>{"alg": "HS256", "typ": "JWT"}</code>).</li>
+    <li><strong>Payload:</strong> Contains claims (user email, user ID, issued-at time, expiration time).</li>
+    <li><strong>Signature:</strong> <code>HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secretKey)</code>. Ensures the token cannot be tampered with.</li>
+    <li><strong>Why Stateless?</strong> The server doesn't store session IDs in memory or database. Every request is self-verifying, allowing horizontal server scaling.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>2. BCrypt Password Hashing & Salt:</h3>
+  <p>
+    Standard hashing algorithms (MD5, SHA-256) are fast and vulnerable to hardware-accelerated dictionary and rainbow table attacks.
+    <strong>BCrypt is an adaptive hash function</strong> based on the Blowfish cipher:
+  </p>
+  <ul>
+    <li><strong>Salting:</strong> Appends a random 16-byte string to the password before hashing. Guarantees two identical passwords generate completely different hashes.</li>
+    <li><strong>Work Factor (Cost):</strong> In our project, work factor = 10 (2<sup>10</sup> = 1024 iterations). It intentionally slows down verification to make brute-force attacks computationally infeasible.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>3. In-Browser Document Preview (How does it work without download?):</h3>
+  <p>
+    When you click "Download", the server sends header <code>Content-Disposition: attachment; filename="report.pdf"</code>.
+    When you click "Preview", the server sends header <code>Content-Disposition: inline; filename="report.pdf"</code> with <code>Content-Type: application/pdf</code>.
+    The browser's native PDF rendering engine / image decoder displays the raw binary stream directly inside our modal iframe without saving it to disk.
+  </p>
+</div>
+
+<div class="card">
+  <h3>4. ACID Properties in our Database:</h3>
+  <ul>
+    <li><strong>Atomicity:</strong> If user uploads a file, saving metadata + saving binary data + updating user storage quota happens in a single <code>@Transactional</code> boundary. If anything fails, everything rolls back.</li>
+    <li><strong>Consistency:</strong> Foreign keys prevent orphan files (a file cannot point to a non-existent owner).</li>
+    <li><strong>Isolation:</strong> HikariCP pool handles concurrent uploads without dirty reads.</li>
+    <li><strong>Durability:</strong> Once committed in Supabase PostgreSQL, data is permanently written to disk.</li>
+  </ul>
+</div>
+
+<!-- PAGE 4: VIVA QUESTIONS & ANSWERS (THE GOLD MINE) -->
+<div class="page-break"></div>
+<div class="header">
+  <div>
+    <h1>TOP VIVA QUESTIONS & PROFESSOR CROSS-EXAMINATION</h1>
+    <div class="sub">Exact Questions Evaluators Ask & Model Answers</div>
+  </div>
+  <span class="badge badge-warning">Viva Gold Mine</span>
+</div>
+
+<h2>7. Anticipated Professor Questions & High-Scoring Answers</h2>
+
+<div class="qa-block">
+  <div class="qa-q">Q1: Why did you choose Spring Boot instead of Node.js / Express or Django?</div>
+  <div class="qa-a">
+    "Spring Boot provides enterprise-grade robustness, built-in dependency injection, and declarative transaction management (<code>@Transactional</code>) which is critical when synchronizing database records with binary file storage. Java 17 offers strong type-safety, high concurrency, and Spring Security provides out-of-the-box protection against CSRF, session fixation, and brute-force vulnerabilities compared to manually wiring security middleware in Express."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q2: Where are the uploaded files physically stored? What happens if Render restarts?</div>
+  <div class="qa-a">
+    "In local development, files can be stored on the local disk (<code>./storage_uploads</code>). However, because cloud container platforms like Render Free Tier use ephemeral filesystems (disks are wiped on container reboot), we engineered a <strong>Database-backed binary storage strategy</strong> for cloud production. File bytes are stored directly in PostgreSQL using a dedicated <code>file_contents</code> table with a <code>BYTEA</code> column. This guarantees 100% data persistence across container sleep cycles and reboots at zero cost!"
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q3: How do you prevent Insecure Direct Object References (IDOR) so User A cannot see User B's files?</div>
+  <div class="qa-a">
+    "Every file access endpoint (download, preview, rename, delete) fetches the authenticated user's email directly from the Spring Security <code>SecurityContextHolder</code> (extracted from the cryptographically signed JWT). Repository queries use composite lookups like <code>findByIdAndOwnerAndIsDeletedFalse(id, authenticatedUser)</code>. Even if User A changes the URL ID to User B's file ID, the query returns empty, resulting in an automatic <code>404 Not Found</code> or <code>403 Forbidden</code>."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q4: How does hierarchical folder organization work in SQL? Isn't SQL relational and folders hierarchical?</div>
+  <div class="qa-a">
+    "We use an <strong>Adjacency List Model</strong>. The <code>folders</code> table has a self-referencing foreign key column <code>parent_id</code> pointing to <code>folders(id)</code>. Root folders have <code>parent_id = NULL</code>. To render breadcrumbs, we recursively traverse up the parent pointers. To list folder contents, we query <code>WHERE parent_id = :folderId</code>. This gives infinite nesting with simple relational queries."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q5: How does public link sharing work without compromising authentication?</div>
+  <div class="qa-a">
+    "When a user shares a file, we generate a cryptographically random 32-character UUID token, configure permissions (<code>VIEWER</code> or <code>EDITOR</code>), and set an optional <code>expires_at</code> timestamp in the <code>share_links</code> table. In <code>SecurityConfig.java</code>, the endpoint <code>/api/share/**</code> is permitted publicly. When a recipient accesses <code>/api/share/{token}</code>, the server checks if the link exists and whether <code>now() &lt; expires_at</code>. If valid, it returns only that specific resource stream without giving access to the owner's full drive."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q6: What is the difference between soft delete and hard delete in your system?</div>
+  <div class="qa-a">
+    "Soft delete sets the flag <code>is_deleted = true</code> on the file or folder and immediately deducts the file size from the user's active storage quota, moving it to the Trash view. The user can click 'Restore' to flip the flag back to <code>false</code>. Hard delete (permanent purge) deletes the record from both the database and binary table, permanently freeing disk space."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q7: What is CORS and why did you configure it?</div>
+  <div class="qa-a">
+    "CORS (Cross-Origin Resource Sharing) is a browser security mechanism that blocks a frontend running on one domain (e.g., <code>https://your-app.vercel.app</code>) from making AJAX requests to a backend on another domain (e.g., <code>https://your-api.onrender.com</code>). We configured <code>CorsConfigurationSource</code> in Spring Security to explicitly permit requests from our frontend domain and expose headers like <code>Content-Disposition</code> so file download names are readable by Axios."
+  </div>
+</div>
+
+<div class="qa-block">
+  <div class="qa-q">Q8: How do you handle file upload limits and quota enforcement?</div>
+  <div class="qa-a">
+    "We enforce two layers of validation: first, Spring Boot's <code>MultipartFile</code> configuration sets a hard ceiling of 50MB per file and 100MB per request. Second, at the business logic level in <code>FileStorageService</code>, we verify if <code>user.getUsedStorage() + file.getSize() &gt; user.getStorageQuota()</code> (default 500MB). If exceeded, it throws an <code>IllegalStateException</code> with an informative message before any bytes are written."
+  </div>
+</div>
+
+<!-- PAGE 5: PRESENTATION SCRIPT & LIVE DEMO WALKTHROUGH -->
+<div class="page-break"></div>
+<div class="header">
+  <div>
+    <h1>HOW TO PRESENT TOMORROW (SCRIPT & DEMO CHEATSHEET)</h1>
+    <div class="sub">Step-by-Step Presentation Script to Wow the Evaluators</div>
+  </div>
+  <span class="badge badge-purple">Demo Script</span>
+</div>
+
+<h2>8. 5-Minute Presentation Script (Say This Confidently!)</h2>
+
+<div class="tip-box">
+  <strong>Pro-Tip for Tomorrow:</strong> Speak with confidence! You have built a genuine, complete full-stack production application that is live on the internet. Start with the problem, show the architecture, then immediately open the live demo!
+</div>
+
+<h3>Minute 1: Introduction & Problem Statement</h3>
+<p>
+  <em>"Respected teachers and evaluators, good morning. Today, our team—Ravinder, Utkarsh, and myself, Naman Kumar—is presenting our Project-I titled <strong>'Secure Cloud-Based File Storage and Document Management System'</strong>, carried out under the supervision of Dr. Kuntal Mukherjee.<br>
+  Commercial cloud storage platforms like Google Drive and Dropbox present privacy concerns, vendor lock-in, and unpredictable subscription fees. Our objective was to engineer a self-hosted, cloud-native document management platform that guarantees zero-trust security, strict user quotas, and fine-grained sharing without sacrificing user experience."</em>
+</p>
+
+<h3>Minute 2: Architecture & Technology Choices</h3>
+<p>
+  <em>"We chose a decoupled 3-tier architecture: on the frontend, we built a responsive single-page application using <strong>React 18</strong>, <strong>Vite</strong>, and <strong>Tailwind CSS</strong> with dark and light themes. On the backend, we developed a <strong>Spring Boot 3.3.4</strong> REST API utilizing <strong>Spring Security 6</strong> and <strong>JJWT</strong> for stateless Bearer token authorization.<br>
+  For data and persistence, we engineered a dual database architecture: embedded <strong>H2</strong> for zero-setup local development, and cloud <strong>PostgreSQL on Supabase</strong> with database-backed binary storage for our live production deployment on <strong>Vercel and Render</strong>."</em>
+</p>
+
+<h3>Minutes 3-4: Live Demonstration Flow (Follow This Exact Order!)</h3>
+<ol>
+  <li><strong>Open the Live URL:</strong> Open your Vercel website link on the projector or screen. Show the modern Google Drive-inspired dashboard.</li>
+  <li><strong>Authentication:</strong> Show the Login / Register modal. Explain that passwords are protected with <strong>BCrypt hashing</strong> and sessions use stateless <strong>JWT tokens</strong>.</li>
+  <li><strong>Create a Folder:</strong> Click "+ New Action" ➔ "New Folder" ➔ Name it <code>"Semester 5 Exam Notes"</code>. Show how it appears instantly in the grid.</li>
+  <li><strong>Upload a Document:</strong> Drag and drop a PDF file into the canvas. Show the upload progress indicator.</li>
+  <li><strong>In-Browser PDF Preview (Showstopper Feature!):</strong> Click on the uploaded PDF. The in-browser preview modal opens instantly displaying the document inline without downloading it. Mention: <em>"We achieve this by streaming raw bytes with <code>Content-Disposition: inline</code>."</em></li>
+  <li><strong>Generate Share Link:</strong> Click the share icon on the file. Select <code>VIEWER</code> permission and set an expiry of <code>24 Hours</code>. Copy the link, open an Incognito tab, and paste it. Show how external users can view/download the shared file without accessing the rest of the drive.</li>
+  <li><strong>Storage Quota Meter:</strong> Point to the sidebar storage bar (e.g., <code>14.2 MB of 500 MB used</code>). Explain that every upload and delete dynamically updates the quota in real-time.</li>
+  <li><strong>Trash & Recycle Bin:</strong> Delete a test file. Show how it moves to the Trash view. Click "Restore" and show it instantly reappear in "My Drive".</li>
+  <li><strong>Swagger UI:</strong> Open <code>/swagger-ui.html</code> on Render. Show the complete OpenAPI documentation of all 24 endpoints.</li>
+</ol>
+
+<h3>Minute 5: Conclusion</h3>
+<p>
+  <em>"To conclude, our project completely satisfies all 19 functional requirements from the approved SRS report. It demonstrates real-world software engineering principles—including RESTful design, relational modeling, containerization with Docker, and CI/CD deployment. We are now open to any questions. Thank you!"</em>
+</p>
+
+<div class="card-highlight" style="margin-top: 18px;">
+  <strong>Quick Checklist Before You Walk In:</strong><br>
+  ☑ Have the live Vercel link open in a browser tab.<br>
+  ☑ Have the Swagger UI tab open (<code>/swagger-ui.html</code>).<br>
+  ☑ Have a sample PDF and sample image ready on your desktop to drag-and-drop.<br>
+  ☑ Remember the key buzzwords: <strong>Stateless JWT, BCrypt Salting, Adjacency List Hierarchy, Content-Disposition Inline, ACID Transactions, Adherence to SRS FR-01 to FR-19</strong>.
+</div>
+
+</body>
+</html>
