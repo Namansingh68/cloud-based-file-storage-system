@@ -48,6 +48,13 @@ A full-stack, self-hosted, privacy-focused alternative to proprietary cloud stor
 | **Icons** | Lucide React | Modern vector icon set |
 | **HTTP Client**| Axios | JWT Bearer token interceptor, upload progress tracking |
 
+## ☁️ Cloud Deployment (Vercel + Render + Supabase)
+Deploy this project for free in 10 minutes so teachers, seniors, and friends can access it publicly on mobile or laptop:
+👉 **Complete Step-by-Step Guide**: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+- **Frontend**: [Vercel](https://vercel.com) (React 18 + Vite)
+- **Backend**: [Render](https://render.com) (Spring Boot 3.3.4 Docker container)
+- **Database & Storage**: [Supabase](https://supabase.com) (PostgreSQL with persistent binary storage)
+
 ---
 
 ## 🚀 Quick Start Guide
