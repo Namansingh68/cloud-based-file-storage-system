@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -14,13 +14,15 @@ spring:
 # App Custom Properties
 app:
   jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-    expiration-ms: 86400000 # 24 hours
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
   storage:
-    upload-dir: ./storage_uploads
-    default-quota-bytes: 524288000 # 500 MB default quota per user (FR-18)
+    type: ${APP_STORAGE_TYPE:filesystem}
+    upload-dir: ${APP_STORAGE_UPLOAD_DIR:./storage_uploads}
+    default-quota-bytes: ${APP_DEFAULT_QUOTA_BYTES:524288000} # 500 MB default quota per user (FR-18)
 
 ---
+# Local Development Profile (Embedded H2 Database)
 spring:
   config:
     activate:
@@ -40,23 +42,39 @@ spring:
       enabled: true
       path: /h2-console
 
+app:
+  storage:
+    type: filesystem
+
 ---
+# Cloud Production Profile (Supabase / Render PostgreSQL)
 spring:
   config:
     activate:
       on-profile: postgres
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fileserver_db}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/fileserver_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:postgres}}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 8
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1800000
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: false
 
-# Swagger/OpenAPI Configuration (FR-19)
+app:
+  storage:
+    type: ${APP_STORAGE_TYPE:database}
+
+---
+# Swagger / OpenAPI Documentation (FR-19)
 springdoc:
   api-docs:
     path: /v3/api-docs
