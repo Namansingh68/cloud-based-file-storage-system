@@ -1,10 +1,12 @@
 package com.project.fileserver.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "files")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class FileMetadata {
 
     @Id

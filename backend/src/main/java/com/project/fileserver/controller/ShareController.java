@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -73,14 +74,33 @@ public class ShareController {
     public ResponseEntity<?> getSharedResource(@PathVariable String token) {
         try {
             ShareLink link = shareService.getValidShareLink(token);
-            return ResponseEntity.ok(Map.of(
-                    "permission", link.getPermission(),
-                    "file", link.getFile() != null ? link.getFile() : null,
-                    "folder", link.getFolder() != null ? link.getFolder() : null,
-                    "expiresAt", link.getExpiresAt() != null ? link.getExpiresAt().toString() : "never"
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("permission", link.getPermission());
+            if (link.getFile() != null) {
+                FileMetadata f = link.getFile();
+                Map<String, Object> fMap = new HashMap<>();
+                fMap.put("id", f.getId());
+                fMap.put("name", f.getName());
+                fMap.put("size", f.getSize());
+                fMap.put("contentType", f.getContentType());
+                fMap.put("createdAt", f.getCreatedAt() != null ? f.getCreatedAt().toString() : "");
+                response.put("file", fMap);
+            } else {
+                response.put("file", null);
+            }
+            if (link.getFolder() != null) {
+                Map<String, Object> foldMap = new HashMap<>();
+                foldMap.put("id", link.getFolder().getId());
+                foldMap.put("name", link.getFolder().getName());
+                response.put("folder", foldMap);
+            } else {
+                response.put("folder", null);
+            }
+            response.put("expiresAt", link.getExpiresAt() != null ? link.getExpiresAt().toString() : "never");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            String msg = e.getMessage() != null ? e.getMessage() : "Invalid or expired share link";
+            return ResponseEntity.badRequest().body(Map.of("message", msg));
         }
     }
 
@@ -100,7 +120,8 @@ public class ShareController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
                     .body(resource);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            String msg = e.getMessage() != null ? e.getMessage() : "Error downloading shared file";
+            return ResponseEntity.badRequest().body(Map.of("message", msg));
         }
     }
 }

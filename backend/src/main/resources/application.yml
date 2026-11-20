@@ -10,6 +10,9 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 
 # App Custom Properties
 app:

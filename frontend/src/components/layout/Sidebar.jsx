@@ -4,12 +4,13 @@ import {
   FolderPlus,
   UploadCloud,
   Trash2,
-  Share2,
   Plus,
   AlertTriangle,
-  FileText,
-  Clock,
-  ChevronDown
+  ChevronDown,
+  X,
+  PieChart,
+  ShieldCheck,
+  GraduationCap
 } from 'lucide-react';
 import { useDrive } from '../../context/DriveContext';
 
@@ -18,7 +19,9 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
     isTrashView,
     setIsTrashView,
     storageStats,
-    navigateToFolder
+    navigateToFolder,
+    isMobileSidebarOpen,
+    setIsMobileSidebarOpen
   } = useDrive();
 
   const [showNewMenu, setShowNewMenu] = useState(false);
@@ -34,18 +37,18 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
   const isWarning = storageStats.usedPercentage >= 80;
   const isDanger = storageStats.usedPercentage >= 95;
 
-  return (
-    <aside className="w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col justify-between h-[calc(100vh-4rem)] select-none">
-      <div className="space-y-6">
+  const sidebarContent = (
+    <div className="flex flex-col justify-between h-full p-4 select-none">
+      <div className="space-y-5">
         {/* "+ New" Action Button */}
         <div className="relative">
           <button
             onClick={() => setShowNewMenu(!showNewMenu)}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-md shadow-brand-500/20 transition-all active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-500/25 transition-all active:scale-[0.98]"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>New Action</span>
-            <ChevronDown className="w-4 h-4 ml-auto opacity-75" />
+            <ChevronDown className={`w-4 h-4 ml-auto transition-transform ${showNewMenu ? 'rotate-180' : ''}`} />
           </button>
 
           {showNewMenu && (
@@ -53,14 +56,17 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
               <button
                 onClick={() => {
                   setShowNewMenu(false);
+                  setIsMobileSidebarOpen(false);
                   onUploadClick();
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-left transition-colors"
               >
-                <UploadCloud className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                  <UploadCloud className="w-4 h-4" />
+                </div>
                 <div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-100">Upload File</p>
-                  <p className="text-[10px] text-slate-400">Up to 50MB per SRS</p>
+                  <p className="font-bold text-slate-800 dark:text-slate-100">Upload File</p>
+                  <p className="text-[10px] text-slate-400">Up to 50MB (FR-04, FR-08)</p>
                 </div>
               </button>
 
@@ -69,14 +75,17 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
               <button
                 onClick={() => {
                   setShowNewMenu(false);
+                  setIsMobileSidebarOpen(false);
                   onNewFolderClick();
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-left transition-colors"
               >
-                <FolderPlus className="w-4 h-4 text-indigo-500" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center">
+                  <FolderPlus className="w-4 h-4" />
+                </div>
                 <div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-100">New Folder</p>
-                  <p className="text-[10px] text-slate-400">Hierarchical organization</p>
+                  <p className="font-bold text-slate-800 dark:text-slate-100">New Folder</p>
+                  <p className="text-[10px] text-slate-400">Hierarchy & grouping (FR-06)</p>
                 </div>
               </button>
             </div>
@@ -89,37 +98,49 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
             onClick={() => {
               setIsTrashView(false);
               navigateToFolder(null);
+              setIsMobileSidebarOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               !isTrashView
-                ? 'bg-brand-50 dark:bg-brand-950/70 text-brand-700 dark:text-brand-300 font-bold'
+                ? 'bg-brand-50 dark:bg-brand-950/70 text-brand-700 dark:text-brand-300 shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
             }`}
           >
-            <HardDrive className={`w-4 h-4 ${!isTrashView ? 'text-brand-600' : 'text-slate-400'}`} />
-            <span>My Storage</span>
+            <div className="flex items-center gap-3">
+              <HardDrive className={`w-4 h-4 ${!isTrashView ? 'text-brand-600' : 'text-slate-400'}`} />
+              <span>My Storage</span>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500">
+              {storageStats.fileCount}
+            </span>
           </button>
 
           <button
-            onClick={() => setIsTrashView(true)}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+            onClick={() => {
+              setIsTrashView(true);
+              setIsMobileSidebarOpen(false);
+            }}
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               isTrashView
-                ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold'
+                ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
             }`}
           >
-            <Trash2 className={`w-4 h-4 ${isTrashView ? 'text-rose-600' : 'text-slate-400'}`} />
-            <span>Trash / Recycle</span>
+            <div className="flex items-center gap-3">
+              <Trash2 className={`w-4 h-4 ${isTrashView ? 'text-rose-600' : 'text-slate-400'}`} />
+              <span>Trash / Recycle Bin</span>
+            </div>
+            <span className="text-[10px] font-semibold text-rose-500">FR-17</span>
           </button>
         </nav>
       </div>
 
       {/* Bottom: Storage Quota Widget (FR-18) */}
       <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
             <span className="flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5 text-slate-400" />
+              <PieChart className="w-3.5 h-3.5 text-brand-600" />
               <span>Storage Quota</span>
             </span>
             <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
@@ -141,7 +162,7 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
             />
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             <span>{formatBytes(storageStats.usedBytes)} used</span>
             <span>{formatBytes(storageStats.quotaBytes)} total</span>
           </div>
@@ -154,12 +175,61 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
           )}
         </div>
 
-        {/* Academic Project Badge */}
-        <div className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-          <p className="font-semibold text-slate-600 dark:text-slate-400">BIT Mesra • Project-I</p>
-          <p>Dept. of Computer Science & Engg.</p>
+        {/* Academic Project Presentation Badge */}
+        <div className="p-2.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-[10px] text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 mb-0.5">
+            <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+            <span>BIT Mesra • Project-I</span>
+          </div>
+          <p className="text-[10px] text-slate-400">CS24300 Cloud Document Vault</p>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar (docked) */}
+      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 h-[calc(100vh-4rem)]">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Slide-Over Drawer with Backdrop */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex animate-in fade-in duration-200">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="relative w-4/5 max-w-xs bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col z-10 border-r border-slate-200 dark:border-slate-800 animate-slide-left">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
+                  <HardDrive className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-slate-900 dark:text-white text-sm">
+                  CloudVault
+                </span>
+              </div>
+              <button
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {sidebarContent}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
-import { DriveProvider } from './context/DriveContext';
+import { DriveProvider, useDrive } from './context/DriveContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { ExplorerView } from './components/explorer/ExplorerView';
 import { AuthModal } from './components/auth/AuthModal';
 import { SharedView } from './components/share/SharedView';
+import { Toast } from './components/common/Toast';
 
 function AppContent() {
+  const {
+    setIsUploadModalOpen,
+    setIsNewFolderOpen,
+    toast,
+    setToast
+  } = useDrive();
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
   const [sharedToken, setSharedToken] = useState(null);
 
   useEffect(() => {
@@ -27,26 +33,31 @@ function AppContent() {
   }, []);
 
   if (sharedToken) {
-    return <SharedView token={sharedToken} onBack={() => {
-      window.history.pushState({}, '', '/');
-      setSharedToken(null);
-    }} />;
+    return (
+      <SharedView
+        token={sharedToken}
+        onBack={() => {
+          window.history.pushState({}, '', '/');
+          setSharedToken(null);
+        }}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
-      {/* Top Navigation */}
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-x-hidden">
+      {/* Top Navigation Bar */}
       <Navbar onOpenAuth={() => setIsAuthModalOpen(true)} />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar (Desktop docked + Mobile drawer) */}
         <Sidebar
           onUploadClick={() => setIsUploadModalOpen(true)}
           onNewFolderClick={() => setIsNewFolderOpen(true)}
         />
 
-        {/* Dynamic Drive Explorer Area */}
+        {/* Dynamic Drive Explorer Canvas */}
         <ExplorerView />
       </div>
 
@@ -55,6 +66,9 @@ function AppContent() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {/* Global SaaS Toast Notification Banner */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

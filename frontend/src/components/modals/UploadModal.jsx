@@ -62,31 +62,36 @@ export const UploadModal = () => {
         setSelectedFile(null);
         setIsSuccess(false);
         setProgress(0);
-      }, 1200);
+      }, 1000);
     } else {
       setError(res.error || 'Upload failed');
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 sticky top-0 z-10">
           <div className="flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-brand-600" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Upload File (FR-04, FR-08)</h3>
+            <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+              <UploadCloud className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Upload File (FR-04, FR-08)</h3>
+              <p className="text-[10px] text-slate-400">Target: {currentFolder?.name || 'My Drive'}</p>
+            </div>
           </div>
           <button
             onClick={() => setIsUploadModalOpen(false)}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-5 sm:p-6 space-y-4">
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -103,7 +108,7 @@ export const UploadModal = () => {
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${
+            className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 ${
               isDragOver
                 ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-950/40 scale-[1.01]'
                 : 'border-slate-200 dark:border-slate-700 hover:border-brand-400 dark:hover:border-brand-500 bg-slate-50/40 dark:bg-slate-800/30'
@@ -116,28 +121,28 @@ export const UploadModal = () => {
               className="hidden"
             />
 
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center shadow-xs">
               <ArrowUp className="w-6 h-6" />
             </div>
 
             <div>
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                Click to browse or drag and drop
+              <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+                Tap or click to browse files
               </p>
               <p className="text-[10px] text-slate-400 mt-1">
-                Supported: PDF, DOCX, Images, Audio, Video, Code (Max 50MB)
+                Supports PDF, Images, Audio, Video, Docs, Code (Max 50MB)
               </p>
             </div>
           </div>
 
           {/* Selected File Details */}
           {selectedFile && (
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
                 <FileText className="w-4 h-4 text-brand-600 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedFile.name}</p>
-                  <p className="text-[10px] text-slate-400">{formatBytes(selectedFile.size)}</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{selectedFile.name}</p>
+                  <p className="text-[10px] font-mono text-slate-400">{formatBytes(selectedFile.size)}</p>
                 </div>
               </div>
 
@@ -149,8 +154,8 @@ export const UploadModal = () => {
           {uploading && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                <span>Uploading...</span>
-                <span>{progress}%</span>
+                <span>Uploading to encrypted store...</span>
+                <span className="font-mono">{progress}%</span>
               </div>
               <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
@@ -165,9 +170,9 @@ export const UploadModal = () => {
           <button
             onClick={handleStartUpload}
             disabled={!selectedFile || uploading}
-            className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold text-xs shadow-sm transition-all"
+            className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all active:scale-[0.98]"
           >
-            {isSuccess ? 'Upload Completed!' : uploading ? `Uploading (${progress}%)...` : 'Confirm Upload'}
+            {isSuccess ? 'Upload Completed!' : uploading ? `Uploading (${progress}%)...` : 'Confirm & Upload File'}
           </button>
         </div>
       </div>

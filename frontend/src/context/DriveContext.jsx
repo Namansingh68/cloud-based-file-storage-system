@@ -5,9 +5,9 @@ import { useAuth } from './AuthContext';
 const DriveContext = createContext(null);
 
 export const DriveProvider = ({ children }) => {
-  const { token, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  // Default demonstration items for public web visitors
+  // Initial demonstration items for presentation and offline resiliency
   const INITIAL_FOLDERS = [
     { id: 101, name: 'Semester 5 Coursework', isDeleted: false, createdAt: '2026-09-20T10:00:00' },
     { id: 102, name: 'Documentation & SRS', isDeleted: false, createdAt: '2026-09-21T11:30:00' },
@@ -39,7 +39,7 @@ export const DriveProvider = ({ children }) => {
       contentType: 'text/plain',
       createdAt: '2026-09-22T10:15:00',
       isDeleted: false,
-      sampleText: '-- PostgreSQL Database Schema for Secure Cloud File Storage\nCREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, password_hash VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, storage_quota BIGINT DEFAULT 524288000, used_storage BIGINT DEFAULT 0);\nCREATE TABLE folders (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, parent_id INT REFERENCES folders(id), owner_id INT REFERENCES users(id), is_deleted BOOLEAN DEFAULT FALSE);\nCREATE TABLE files (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, storage_path VARCHAR(500) NOT NULL, size BIGINT NOT NULL, content_type VARCHAR(100), owner_id INT REFERENCES users(id), folder_id INT REFERENCES folders(id), is_deleted BOOLEAN DEFAULT FALSE);'
+      sampleText: '-- PostgreSQL Database Schema for Secure Cloud File Storage\nCREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  email VARCHAR(255) UNIQUE NOT NULL,\n  password_hash VARCHAR(255) NOT NULL,\n  name VARCHAR(255) NOT NULL,\n  storage_quota BIGINT DEFAULT 524288000,\n  used_storage BIGINT DEFAULT 0\n);\n\nCREATE TABLE folders (\n  id SERIAL PRIMARY KEY,\n  name VARCHAR(255) NOT NULL,\n  parent_id INT REFERENCES folders(id),\n  owner_id INT REFERENCES users(id),\n  is_deleted BOOLEAN DEFAULT FALSE\n);\n\nCREATE TABLE files (\n  id SERIAL PRIMARY KEY,\n  name VARCHAR(255) NOT NULL,\n  storage_path VARCHAR(500) NOT NULL,\n  size BIGINT NOT NULL,\n  content_type VARCHAR(100),\n  owner_id INT REFERENCES users(id),\n  folder_id INT REFERENCES folders(id),\n  is_deleted BOOLEAN DEFAULT FALSE\n);'
     },
     {
       id: 204,
@@ -48,7 +48,7 @@ export const DriveProvider = ({ children }) => {
       contentType: 'text/plain',
       createdAt: '2026-09-22T12:00:00',
       isDeleted: false,
-      sampleText: 'Project: Secure Cloud Storage and Document Management\nDepartment: Computer Science & Engineering, BIT Mesra\nTeam: Ravinder Dhayal, Utkarsh Tikkiwal, Naman Kumar\nSupervisor: Dr. Kuntal Mukherjee\nTech Stack: Spring Boot 3.x, React 18, Tailwind CSS, PostgreSQL'
+      sampleText: 'Project: Secure Cloud Storage and Document Management\nDepartment: Computer Science & Engineering, BIT Mesra\nTeam: Ravinder Dhayal, Utkarsh Tikkiwal, Naman Kumar\nSupervisor: Dr. Kuntal Mukherjee\nTech Stack: Spring Boot 3.x, React 19, Tailwind CSS, PostgreSQL / H2 Database'
     }
   ];
 
@@ -60,6 +60,49 @@ export const DriveProvider = ({ children }) => {
   const [isTrashView, setIsTrashView] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Mobile layout state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Dark mode theme state with persistence
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => !prev);
+  };
+
+  // Toast notification state
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message, type = 'info') => {
+    setToast({ message, type, id: Date.now() });
+  }, []);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,7 +118,7 @@ export const DriveProvider = ({ children }) => {
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [activeItemMenu, setActiveItemMenu] = useState(null);
 
-  // Storage Stats (Default 500MB per SRS)
+  // Storage Stats (Default 500MB per SRS FR-18)
   const [storageStats, setStorageStats] = useState({
     usedBytes: 8325393,
     quotaBytes: 524288000, // 500 MB
@@ -126,8 +169,7 @@ export const DriveProvider = ({ children }) => {
         }
       }
     } catch (err) {
-      console.warn('API fetch warning, using local state fallback if needed:', err);
-      // If backend is booting, provide smooth UX without crashing
+      console.warn('API fetch warning, using local state fallback for presentation resilience:', err);
     } finally {
       setLoading(false);
     }
@@ -142,6 +184,7 @@ export const DriveProvider = ({ children }) => {
   // Navigate folder
   const navigateToFolder = (folder) => {
     setIsTrashView(false);
+    setIsMobileSidebarOpen(false); // Close mobile drawer on navigation
     if (!folder || folder.id === null) {
       setCurrentFolder(null);
       setBreadcrumbs([{ id: null, name: 'My Drive' }]);
@@ -178,10 +221,11 @@ export const DriveProvider = ({ children }) => {
         }
       });
       await fetchContents(folderId);
+      showToast(`Uploaded ${file.name} successfully`, 'success');
       return { success: true, file: res.data };
     } catch (err) {
       console.warn('Backend upload offline, storing in local session state:', err);
-      // Local fallback for GitHub Pages demo visitors
+      // Local fallback for offline/demo presentation visitors
       const localFile = {
         id: Date.now(),
         name: file.name,
@@ -193,12 +237,16 @@ export const DriveProvider = ({ children }) => {
         localBlobUrl: URL.createObjectURL(file)
       };
       setFiles(prev => [localFile, ...prev]);
-      setStorageStats(prev => ({
-        ...prev,
-        usedBytes: prev.usedBytes + file.size,
-        usedPercentage: Math.min(100, Math.round(((prev.usedBytes + file.size) / prev.quotaBytes) * 100)),
-        fileCount: prev.fileCount + 1
-      }));
+      setStorageStats(prev => {
+        const newUsed = prev.usedBytes + file.size;
+        return {
+          ...prev,
+          usedBytes: newUsed,
+          usedPercentage: Math.min(100, Math.round((newUsed / prev.quotaBytes) * 100)),
+          fileCount: prev.fileCount + 1
+        };
+      });
+      showToast(`Uploaded ${file.name} (Local Storage)`, 'success');
       return { success: true, file: localFile };
     }
   };
@@ -211,6 +259,7 @@ export const DriveProvider = ({ children }) => {
         parentId: currentFolder?.id || null
       });
       await fetchContents(currentFolder?.id || null);
+      showToast(`Folder "${name}" created`, 'success');
       return { success: true, folder: res.data };
     } catch (err) {
       console.warn('Backend offline, creating local folder:', err);
@@ -223,6 +272,7 @@ export const DriveProvider = ({ children }) => {
       };
       setFolders(prev => [...prev, newFolder]);
       setStorageStats(prev => ({ ...prev, folderCount: prev.folderCount + 1 }));
+      showToast(`Folder "${name}" created (Local)`, 'success');
       return { success: true, folder: newFolder };
     }
   };
@@ -233,6 +283,7 @@ export const DriveProvider = ({ children }) => {
       const endpoint = type === 'folder' ? `/folders/${id}/rename` : `/files/${id}/rename`;
       await api.put(endpoint, { newName });
       await fetchContents(currentFolder?.id || null);
+      showToast(`Renamed to "${newName}"`, 'success');
       return { success: true };
     } catch (err) {
       if (type === 'folder') {
@@ -240,6 +291,7 @@ export const DriveProvider = ({ children }) => {
       } else {
         setFiles(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
       }
+      showToast(`Renamed to "${newName}"`, 'success');
       return { success: true };
     }
   };
@@ -250,6 +302,7 @@ export const DriveProvider = ({ children }) => {
       const endpoint = type === 'folder' ? `/folders/${id}` : `/files/${id}`;
       await api.delete(endpoint);
       await fetchContents(currentFolder?.id || null);
+      showToast('Moved to Trash / Recycle Bin', 'info');
       return { success: true };
     } catch (err) {
       if (type === 'folder') {
@@ -265,6 +318,7 @@ export const DriveProvider = ({ children }) => {
           setTrashItems(prev => ({ ...prev, files: [...prev.files, { ...target, isDeleted: true }] }));
         }
       }
+      showToast('Moved to Trash / Recycle Bin', 'info');
       return { success: true };
     }
   };
@@ -275,6 +329,7 @@ export const DriveProvider = ({ children }) => {
       const endpoint = type === 'folder' ? `/folders/${id}/restore` : `/files/${id}/restore`;
       await api.post(endpoint);
       await fetchContents();
+      showToast('Restored successfully', 'success');
       return { success: true };
     } catch (err) {
       if (type === 'folder') {
@@ -290,6 +345,7 @@ export const DriveProvider = ({ children }) => {
           setFiles(prev => [...prev, { ...target, isDeleted: false }]);
         }
       }
+      showToast('Restored successfully', 'success');
       return { success: true };
     }
   };
@@ -300,6 +356,7 @@ export const DriveProvider = ({ children }) => {
       const endpoint = type === 'folder' ? `/folders/${id}/permanent` : `/files/${id}/permanent`;
       await api.delete(endpoint);
       await fetchContents();
+      showToast('Permanently deleted', 'warning');
       return { success: true };
     } catch (err) {
       if (type === 'folder') {
@@ -307,6 +364,7 @@ export const DriveProvider = ({ children }) => {
       } else {
         setTrashItems(prev => ({ ...prev, files: prev.files.filter(f => f.id !== id) }));
       }
+      showToast('Permanently deleted', 'warning');
       return { success: true };
     }
   };
@@ -317,6 +375,7 @@ export const DriveProvider = ({ children }) => {
       const endpoint = type === 'folder' ? `/folders/${id}/move` : `/files/${id}/move`;
       await api.put(endpoint, { targetFolderId });
       await fetchContents(currentFolder?.id || null);
+      showToast('Moved item successfully', 'success');
       return { success: true };
     } catch (err) {
       if (type === 'folder') {
@@ -324,6 +383,7 @@ export const DriveProvider = ({ children }) => {
       } else {
         setFiles(prev => prev.map(f => f.id === id ? { ...f, folderId: targetFolderId } : f));
       }
+      showToast('Moved item successfully', 'success');
       return { success: true };
     }
   };
@@ -379,6 +439,15 @@ export const DriveProvider = ({ children }) => {
       restoreFromTrash,
       permanentDelete,
       moveItem,
+      // Mobile Drawer & Theme
+      isMobileSidebarOpen,
+      setIsMobileSidebarOpen,
+      isDarkMode,
+      toggleDarkMode,
+      // Toast
+      toast,
+      showToast,
+      setToast,
       // Modals
       previewFile,
       setPreviewFile,
