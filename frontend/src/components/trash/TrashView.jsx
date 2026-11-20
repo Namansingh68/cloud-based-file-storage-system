@@ -15,7 +15,7 @@ export const TrashView = () => {
         <div>
           <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-rose-500" />
-            <span>Trash / Recycle Bin (FR-17)</span>
+            <span>Trash</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
             Deleted files and folders are retained here and can be restored at any time.

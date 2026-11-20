@@ -67,7 +67,7 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
                 </div>
                 <div>
                   <p className="font-bold text-slate-800 dark:text-slate-100">Upload File</p>
-                  <p className="text-[10px] text-slate-400">Up to 50MB (FR-04, FR-08)</p>
+                  <p className="text-[10px] text-slate-400">Up to 50MB</p>
                 </div>
               </button>
 
@@ -86,7 +86,7 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
                 </div>
                 <div>
                   <p className="font-bold text-slate-800 dark:text-slate-100">New Folder</p>
-                  <p className="text-[10px] text-slate-400">Hierarchy & grouping (FR-06)</p>
+                  <p className="text-[10px] text-slate-400">Organize files into folders</p>
                 </div>
               </button>
             </div>
@@ -129,14 +129,13 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
           >
             <div className="flex items-center gap-3">
               <Trash2 className={`w-4 h-4 ${isTrashView ? 'text-rose-600' : 'text-slate-400'}`} />
-              <span>Trash / Recycle Bin</span>
+              <span>Trash</span>
             </div>
-            <span className="text-[10px] font-semibold text-rose-500">FR-17</span>
           </button>
         </nav>
       </div>
 
-      {/* Bottom: Storage Quota Widget (FR-18) */}
+      {/* Bottom: Storage Quota Widget */}
       <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
         <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 shadow-xs">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
@@ -171,28 +170,28 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
           {isWarning && (
             <div className="mt-2.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 text-[10px] text-amber-700 dark:text-amber-300">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-              <span>Approaching quota limit (FR-18)</span>
+              <span>Approaching quota limit</span>
             </div>
           )}
         </div>
 
-        {/* Academic Project Presentation Badge */}
+        {/* Project & Architecture Info Card */}
         <div
           onClick={() => {
             setIsSpecsModalOpen(true);
             setIsMobileSidebarOpen(false);
           }}
-          title="Click to view System Architecture & SRS Specs"
-          className="p-2.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-[10px] text-slate-500 dark:text-slate-400 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all group"
+          title="Click to view Architecture & Specifications"
+          className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 text-[10px] text-slate-500 dark:text-slate-400 cursor-pointer hover:border-brand-500/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
         >
-          <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 mb-0.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>BIT Mesra • Project-I</span>
+          <div className="flex items-center justify-between font-bold text-slate-700 dark:text-slate-200 mb-0.5 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+            <span className="flex items-center gap-1.5">
+              <GraduationCap className="w-3.5 h-3.5 text-brand-600" />
+              <span>CloudVault Storage</span>
+            </span>
+            <span className="text-[9px] font-semibold text-brand-600 dark:text-brand-400 underline">Specs →</span>
           </div>
-          <p className="text-[10px] text-slate-400 flex items-center justify-between">
-            <span>CS24300 Cloud Document Vault</span>
-            <span className="text-[9px] font-semibold text-indigo-500 underline ml-1">Specs →</span>
-          </p>
+          <p className="text-[10px] text-slate-400">BIT Mesra • Enterprise Document Vault</p>
         </div>
       </div>
     </div>

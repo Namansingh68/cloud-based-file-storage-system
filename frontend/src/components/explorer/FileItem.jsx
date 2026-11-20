@@ -221,7 +221,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                 e.stopPropagation();
                 setPreviewFile(file);
               }}
-              title="Quick Preview (FR-16)"
+              title="Quick Preview"
               className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <Eye className="w-3.5 h-3.5" />
@@ -231,7 +231,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                 e.stopPropagation();
                 onDownload(file);
               }}
-              title="Download File (FR-05)"
+              title="Download File"
               className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
@@ -252,7 +252,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-8 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95">
+              <div className="absolute right-0 top-8 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -262,7 +262,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   <Eye className="w-3.5 h-3.5 text-brand-500" />
-                  <span>Preview (FR-16)</span>
+                  <span>Preview</span>
                 </button>
 
                 <button
@@ -274,7 +274,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Download (FR-05)</span>
+                  <span>Download</span>
                 </button>
 
                 <button
@@ -286,7 +286,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>Share Link (FR-09)</span>
+                  <span>Share Link</span>
                 </button>
 
                 <button
@@ -298,7 +298,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   <Edit2 className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Rename (FR-07)</span>
+                  <span>Rename</span>
                 </button>
 
                 <div className="h-px bg-slate-100 dark:bg-slate-700/50 my-1" />
@@ -312,7 +312,7 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
                   className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Move to Trash (FR-17)</span>
+                  <span>Move to Trash</span>
                 </button>
               </div>
             )}

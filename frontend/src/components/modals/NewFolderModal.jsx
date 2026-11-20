@@ -35,7 +35,7 @@ export const NewFolderModal = () => {
             <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center">
               <FolderPlus className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">New Folder (FR-06)</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">New Folder</h3>
           </div>
           <button
             onClick={() => setIsNewFolderOpen(false)}

@@ -37,7 +37,7 @@ export const RenameModal = ({ item, isOpen, onClose }) => {
             <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center">
               <Edit2 className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Rename Item (FR-07)</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Rename Item</h3>
           </div>
           <button
             onClick={onClose}

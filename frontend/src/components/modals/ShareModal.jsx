@@ -60,7 +60,7 @@ export const ShareModal = () => {
               <Share2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Share Resource (FR-09)</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Share Document</h3>
               <p className="text-[11px] text-slate-400 truncate max-w-[200px] sm:max-w-xs">{shareItem.name}</p>
             </div>
           </div>
@@ -84,7 +84,7 @@ export const ShareModal = () => {
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-slate-400" />
-              <span>Access Permission (FR-10 & FR-11)</span>
+              <span>Access Permission</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
@@ -141,7 +141,7 @@ export const ShareModal = () => {
               className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-md shadow-brand-500/20 active:scale-[0.98]"
             >
               <Globe className="w-4 h-4" />
-              <span>{loading ? 'Generating Link...' : 'Create Shareable Link (FR-09)'}</span>
+              <span>{loading ? 'Generating Link...' : 'Create Shareable Link'}</span>
             </button>
           ) : (
             <div className="space-y-2 pt-1 animate-in fade-in">

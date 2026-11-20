@@ -127,16 +127,12 @@ export const Navbar = ({ onOpenAuth }) => {
                   <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-base sm:text-lg">
                     CloudVault
                   </span>
-                  <button
-                    onClick={() => setIsSpecsModalOpen(true)}
-                    title="Click to view SRS Specifications & System Architecture"
-                    className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/80 hover:bg-brand-100 dark:hover:bg-brand-900 transition-colors cursor-pointer"
-                  >
-                    SRS v1.0
-                  </button>
+                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/80">
+                    v1.0
+                  </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block leading-none mt-0.5">
-                  Secure Document Management
+                  Secure Cloud Storage
                 </p>
               </div>
             </div>
@@ -148,7 +144,7 @@ export const Navbar = ({ onOpenAuth }) => {
               <Search className="w-4 h-4 text-slate-400 mr-2.5 shrink-0" />
               <input
                 type="text"
-                placeholder="Search files, folders (FR-12)..."
+                placeholder="Search files, folders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent text-xs sm:text-sm w-full outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400"
@@ -245,24 +241,14 @@ export const Navbar = ({ onOpenAuth }) => {
               </button>
             </div>
 
-            {/* Activity Drawer Toggle (FR-13) */}
+            {/* Activity Drawer Toggle */}
             <button
               onClick={() => setIsActivityOpen(!isActivityOpen)}
-              title="Audit & Activity Log (FR-13)"
+              title="Activity Log"
               className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors relative"
             >
               <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
-            </button>
-
-            {/* System Architecture & Specs Button (Desktop) */}
-            <button
-              onClick={() => setIsSpecsModalOpen(true)}
-              title="System Architecture & SRS Specifications"
-              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold transition-all shadow-2xs"
-            >
-              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>Specs</span>
             </button>
 
             {/* Dark Mode Toggle */}

@@ -123,7 +123,7 @@ export const ActivityDrawer = () => {
                 <Activity className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Activity Log (FR-13)</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Activity Log</h3>
                 <p className="text-[10px] text-slate-400">Audit trail of storage actions</p>
               </div>
             </div>

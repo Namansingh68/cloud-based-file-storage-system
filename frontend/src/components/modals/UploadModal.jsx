@@ -78,7 +78,7 @@ export const UploadModal = () => {
               <UploadCloud className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Upload File (FR-04, FR-08)</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Upload File</h3>
               <p className="text-[10px] text-slate-400">Target: {currentFolder?.name || 'My Drive'}</p>
             </div>
           </div>
