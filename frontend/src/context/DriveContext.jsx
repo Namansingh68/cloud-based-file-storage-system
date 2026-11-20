@@ -116,6 +116,7 @@ export const DriveProvider = ({ children }) => {
   const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isSpecsModalOpen, setIsSpecsModalOpen] = useState(false);
   const [activeItemMenu, setActiveItemMenu] = useState(null);
 
   // Storage Stats (Default 500MB per SRS FR-18)
@@ -459,6 +460,8 @@ export const DriveProvider = ({ children }) => {
       setIsUploadModalOpen,
       isActivityOpen,
       setIsActivityOpen,
+      isSpecsModalOpen,
+      setIsSpecsModalOpen,
       activeItemMenu,
       setActiveItemMenu
     }}>

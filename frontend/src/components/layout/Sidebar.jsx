@@ -21,7 +21,8 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
     storageStats,
     navigateToFolder,
     isMobileSidebarOpen,
-    setIsMobileSidebarOpen
+    setIsMobileSidebarOpen,
+    setIsSpecsModalOpen
   } = useDrive();
 
   const [showNewMenu, setShowNewMenu] = useState(false);
@@ -176,12 +177,22 @@ export const Sidebar = ({ onUploadClick, onNewFolderClick }) => {
         </div>
 
         {/* Academic Project Presentation Badge */}
-        <div className="p-2.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-[10px] text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 mb-0.5">
-            <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+        <div
+          onClick={() => {
+            setIsSpecsModalOpen(true);
+            setIsMobileSidebarOpen(false);
+          }}
+          title="Click to view System Architecture & SRS Specs"
+          className="p-2.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-[10px] text-slate-500 dark:text-slate-400 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all group"
+        >
+          <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 mb-0.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>BIT Mesra • Project-I</span>
           </div>
-          <p className="text-[10px] text-slate-400">CS24300 Cloud Document Vault</p>
+          <p className="text-[10px] text-slate-400 flex items-center justify-between">
+            <span>CS24300 Cloud Document Vault</span>
+            <span className="text-[9px] font-semibold text-indigo-500 underline ml-1">Specs →</span>
+          </p>
         </div>
       </div>
     </div>

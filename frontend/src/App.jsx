@@ -7,11 +7,14 @@ import { ExplorerView } from './components/explorer/ExplorerView';
 import { AuthModal } from './components/auth/AuthModal';
 import { SharedView } from './components/share/SharedView';
 import { Toast } from './components/common/Toast';
+import { SystemSpecsModal } from './components/modals/SystemSpecsModal';
 
 function AppContent() {
   const {
     setIsUploadModalOpen,
     setIsNewFolderOpen,
+    isSpecsModalOpen,
+    setIsSpecsModalOpen,
     toast,
     setToast
   } = useDrive();
@@ -65,6 +68,12 @@ function AppContent() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* System Architecture & SRS Specs Modal */}
+      <SystemSpecsModal
+        isOpen={isSpecsModalOpen}
+        onClose={() => setIsSpecsModalOpen(false)}
       />
 
       {/* Global SaaS Toast Notification Banner */}

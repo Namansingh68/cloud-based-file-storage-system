@@ -99,9 +99,7 @@ export const FolderItem = ({ folder, onRename, onDelete }) => {
     }
   };
 
-  // On touch/mobile: single tap opens folder. On desktop: double-click also opens folder.
   const handleFolderClick = (e) => {
-    // If clicking menu trigger, don't navigate
     if (menuRef.current && menuRef.current.contains(e.target)) return;
     navigateToFolder(folder);
   };
@@ -112,21 +110,24 @@ export const FolderItem = ({ folder, onRename, onDelete }) => {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`group relative flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer select-none active:scale-[0.99] ${
+      className={`group relative flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none active:scale-[0.99] ${
         isDragOver
           ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40 shadow-md ring-2 ring-brand-500/20'
           : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs'
       }`}
     >
-      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
           <Folder className="w-5 h-5 fill-indigo-500/20" />
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate group-hover:text-brand-600 dark:group-hover:text-brand-400" title={folder.name}>
+        <div className="min-w-0 flex-1 pr-1">
+          <p
+            className="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 break-words"
+            title={folder.name}
+          >
             {folder.name}
           </p>
-          <span className="text-[10px] text-slate-400 block leading-tight">Folder</span>
+          <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Folder</span>
         </div>
       </div>
 
@@ -199,97 +200,129 @@ export const FileItem = ({ file, onRename, onDelete, onShare, onDownload }) => {
       draggable
       onDragStart={handleDragStart}
       onClick={() => setPreviewFile(file)}
-      className="group relative flex flex-col justify-between p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs transition-all cursor-pointer select-none active:scale-[0.99]"
+      className="group relative flex flex-col justify-between p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs transition-all cursor-pointer select-none active:scale-[0.99]"
     >
-      <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2.5">
-        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center shrink-0 ${color} group-hover:scale-105 transition-transform`}>
-          <FileIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${color} group-hover:scale-105 transition-transform shadow-2xs`}>
+            <FileIcon className="w-5 h-5" />
+          </div>
+          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-bold font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60">
+            {type}
+          </span>
         </div>
 
-        {/* Menu button */}
-        <div className="relative shrink-0" ref={menuRef}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="File options"
-          >
-            <MoreVertical className="w-4 h-4" />
-          </button>
+        {/* Action Controls & Menu */}
+        <div className="flex items-center gap-1">
+          {/* Desktop Hover Quick Actions */}
+          <div className="hidden lg:group-hover:flex items-center gap-0.5 animate-in fade-in duration-100">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewFile(file);
+              }}
+              title="Quick Preview (FR-16)"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDownload(file);
+              }}
+              title="Download File (FR-05)"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-          {showMenu && (
-            <div className="absolute right-0 top-8 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  setPreviewFile(file);
-                }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                <Eye className="w-3.5 h-3.5 text-brand-500" />
-                <span>Preview (FR-16)</span>
-              </button>
+          {/* Menu button */}
+          <div className="relative shrink-0" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="File options"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  onDownload(file);
-                }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                <Download className="w-3.5 h-3.5 text-blue-500" />
-                <span>Download (FR-05)</span>
-              </button>
+            {showMenu && (
+              <div className="absolute right-0 top-8 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-1.5 z-30 animate-in fade-in zoom-in-95">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    setPreviewFile(file);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <Eye className="w-3.5 h-3.5 text-brand-500" />
+                  <span>Preview (FR-16)</span>
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  onShare(file);
-                }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share Link (FR-09)</span>
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    onDownload(file);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Download (FR-05)</span>
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  onRename(file);
-                }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                <Edit2 className="w-3.5 h-3.5 text-amber-500" />
-                <span>Rename (FR-07)</span>
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    onShare(file);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share Link (FR-09)</span>
+                </button>
 
-              <div className="h-px bg-slate-100 dark:bg-slate-700/50 my-1" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    onRename(file);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <Edit2 className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Rename (FR-07)</span>
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  onDelete(file);
-                }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Move to Trash (FR-17)</span>
-              </button>
-            </div>
-          )}
+                <div className="h-px bg-slate-100 dark:bg-slate-700/50 my-1" />
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    onDelete(file);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Move to Trash (FR-17)</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div>
         <p
-          className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400"
+          className="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug mb-1.5 group-hover:text-brand-600 dark:group-hover:text-brand-400 break-words min-h-[2.1rem]"
           title={file.name}
         >
           {file.name}

@@ -13,7 +13,8 @@ import {
   X,
   Activity,
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  Layers
 } from 'lucide-react';
 import { useDrive } from '../../context/DriveContext';
 import { useAuth } from '../../context/AuthContext';
@@ -31,7 +32,8 @@ export const Navbar = ({ onOpenAuth }) => {
     isMobileSidebarOpen,
     setIsMobileSidebarOpen,
     isDarkMode,
-    toggleDarkMode
+    toggleDarkMode,
+    setIsSpecsModalOpen
   } = useDrive();
 
   const { user, isAuthenticated, logout } = useAuth();
@@ -125,9 +127,13 @@ export const Navbar = ({ onOpenAuth }) => {
                   <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-base sm:text-lg">
                     CloudVault
                   </span>
-                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/80">
+                  <button
+                    onClick={() => setIsSpecsModalOpen(true)}
+                    title="Click to view SRS Specifications & System Architecture"
+                    className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/80 hover:bg-brand-100 dark:hover:bg-brand-900 transition-colors cursor-pointer"
+                  >
                     SRS v1.0
-                  </span>
+                  </button>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block leading-none mt-0.5">
                   Secure Document Management
@@ -249,6 +255,16 @@ export const Navbar = ({ onOpenAuth }) => {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
             </button>
 
+            {/* System Architecture & Specs Button (Desktop) */}
+            <button
+              onClick={() => setIsSpecsModalOpen(true)}
+              title="System Architecture & SRS Specifications"
+              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold transition-all shadow-2xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>Specs</span>
+            </button>
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
@@ -299,6 +315,17 @@ export const Navbar = ({ onOpenAuth }) => {
                         <span>Authenticated Session</span>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        setIsSpecsModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-left transition-colors"
+                    >
+                      <Layers className="w-4 h-4 text-indigo-500" />
+                      <span>System Specs & Architecture</span>
+                    </button>
 
                     <button
                       onClick={() => {
