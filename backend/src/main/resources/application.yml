@@ -91,9 +91,8 @@ spring:
         connectTimeout: 10
         socketTimeout: 30
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     show-sql: false
 
 app:
