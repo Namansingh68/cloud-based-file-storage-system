@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { DriveProvider, useDrive } from './context/DriveContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -16,8 +16,10 @@ function AppContent() {
     isSpecsModalOpen,
     setIsSpecsModalOpen,
     toast,
-    setToast
+    setToast,
+    showToast
   } = useDrive();
+  const { verifyToken } = useAuth();
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [sharedToken, setSharedToken] = useState(null);
@@ -32,6 +34,19 @@ function AppContent() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('token')) {
       setSharedToken(params.get('token'));
+    }
+
+    // Handle single-use email verification link
+    const verifyTokenParam = params.get('verifyToken');
+    if (verifyTokenParam) {
+      verifyToken(verifyTokenParam).then((res) => {
+        if (res.success) {
+          showToast('Email verified successfully! Welcome to CloudVault.', 'success');
+        } else {
+          showToast(res.error || 'Failed to verify email. Link may be expired or already used.', 'error');
+        }
+        window.history.replaceState({}, '', window.location.pathname);
+      });
     }
   }, []);
 

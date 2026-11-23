@@ -13,6 +13,21 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: true
+          connectiontimeout: 7000
+          timeout: 7000
+          writetimeout: 7000
 
 # App Custom Properties
 app:
@@ -23,6 +38,12 @@ app:
     type: ${APP_STORAGE_TYPE:filesystem}
     upload-dir: ${APP_STORAGE_UPLOAD_DIR:./storage_uploads}
     default-quota-bytes: ${APP_DEFAULT_QUOTA_BYTES:524288000} # 500 MB default quota per user (FR-18)
+  frontend-url: ${APP_FRONTEND_URL:https://cloud-based-file-storage-system-delta.vercel.app}
+  mail:
+    from: ${APP_MAIL_FROM:noreply@cloudvault.app}
+    sender-name: ${APP_MAIL_SENDER_NAME:CloudVault Security}
+    otp-expiration-minutes: 15
+    resend-cooldown-seconds: 60
 
 ---
 # Local Development Profile (Embedded H2 Database)

@@ -33,6 +33,29 @@ public class User {
     private String role = "ROLE_USER";
 
     @Column(nullable = false)
+    private boolean emailVerified = false;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(length = 100)
+    private String verificationOtpHash;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(length = 100)
+    private String verificationToken;
+
+    @Column
+    private LocalDateTime verificationOtpExpiry;
+
+    @Column(nullable = false)
+    private int verificationAttempts = 0;
+
+    @Column
+    private LocalDateTime lastVerificationSentAt;
+
+    @Column
+    private LocalDateTime emailVerifiedAt;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();
@@ -68,6 +91,27 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public String getVerificationOtpHash() { return verificationOtpHash; }
+    public void setVerificationOtpHash(String verificationOtpHash) { this.verificationOtpHash = verificationOtpHash; }
+
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public LocalDateTime getVerificationOtpExpiry() { return verificationOtpExpiry; }
+    public void setVerificationOtpExpiry(LocalDateTime verificationOtpExpiry) { this.verificationOtpExpiry = verificationOtpExpiry; }
+
+    public int getVerificationAttempts() { return verificationAttempts; }
+    public void setVerificationAttempts(int verificationAttempts) { this.verificationAttempts = verificationAttempts; }
+
+    public LocalDateTime getLastVerificationSentAt() { return lastVerificationSentAt; }
+    public void setLastVerificationSentAt(LocalDateTime lastVerificationSentAt) { this.lastVerificationSentAt = lastVerificationSentAt; }
+
+    public LocalDateTime getEmailVerifiedAt() { return emailVerifiedAt; }
+    public void setEmailVerifiedAt(LocalDateTime emailVerifiedAt) { this.emailVerifiedAt = emailVerifiedAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

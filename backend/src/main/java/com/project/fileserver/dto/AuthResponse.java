@@ -24,6 +24,7 @@ public class AuthResponse {
         private Long storageQuota;
         private Long usedStorage;
         private String role;
+        private boolean emailVerified;
 
         public UserDto(User user) {
             this.id = user.getId();
@@ -32,6 +33,7 @@ public class AuthResponse {
             this.storageQuota = user.getStorageQuota();
             this.usedStorage = user.getUsedStorage();
             this.role = user.getRole();
+            this.emailVerified = user.isEmailVerified();
         }
 
         public Long getId() { return id; }
@@ -40,5 +42,6 @@ public class AuthResponse {
         public Long getStorageQuota() { return storageQuota; }
         public Long getUsedStorage() { return usedStorage; }
         public String getRole() { return role; }
+        public boolean isEmailVerified() { return emailVerified; }
     }
 }

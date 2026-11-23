@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data);
           localStorage.setItem('user', JSON.stringify(res.data));
         } catch (err) {
-          if (err.response && err.response.status === 401) {
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
@@ -37,20 +37,8 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } else {
-        // Default Demo User for public GitHub Pages visitors
-        const demoUser = {
-          id: 1,
-          name: "Naman Kumar",
-          email: "naman@bitmesra.ac.in",
-          storageQuota: 524288000,
-          usedStorage: 14680064,
-          role: "ROLE_STUDENT"
-        };
-        const demoToken = "demo-token-bit-mesra-mo-2026";
-        setUser(demoUser);
-        setToken(demoToken);
-        localStorage.setItem('user', JSON.stringify(demoUser));
-        localStorage.setItem('token', demoToken);
+        setUser(null);
+        setToken(null);
       }
       setLoading(false);
     };
@@ -62,32 +50,24 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setError(null);
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await api.post('/auth/login', { email: normalizedEmail, password });
       const { token: jwtToken, user: userData } = res.data;
       localStorage.setItem('token', jwtToken);
       localStorage.setItem('user', JSON.stringify(userData));
       setToken(jwtToken);
       setUser(userData);
-      return { success: true };
+      return { success: true, user: userData };
     } catch (err) {
-      // If backend is offline, unreachable, or timed out (e.g. running on Vercel before backend is deployed):
-      // Gracefully provide a clean authenticated session for this email so the app works seamlessly!
-      if (!err.response || err.code === 'ECONNABORTED' || err.message?.includes('timeout') || err.message?.includes('Network Error')) {
-        const cleanName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        const fallbackUser = {
-          id: 1,
-          name: cleanName || "Naman Kumar",
-          email: email,
-          storageQuota: 524288000,
-          usedStorage: 8325393,
-          role: "ROLE_STUDENT"
+      if (err.response?.status === 403 && err.response?.data?.errorCode === 'EMAIL_NOT_VERIFIED') {
+        const message = err.response.data.message || 'Please verify your email before signing in.';
+        setError(message);
+        return {
+          success: false,
+          requiresVerification: true,
+          email: err.response.data.email || email.trim().toLowerCase(),
+          error: message
         };
-        const fallbackToken = "demo-session-token-" + Date.now();
-        localStorage.setItem('token', fallbackToken);
-        localStorage.setItem('user', JSON.stringify(fallbackUser));
-        setToken(fallbackToken);
-        setUser(fallbackUser);
-        return { success: true };
       }
       const message = err.response?.data?.message || 'Invalid email or password.';
       setError(message);
@@ -98,33 +78,90 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setError(null);
     try {
-      const res = await api.post('/auth/register', { name, email, password });
-      const { token: jwtToken, user: userData } = res.data;
-      localStorage.setItem('token', jwtToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setToken(jwtToken);
-      setUser(userData);
-      return { success: true };
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await api.post('/auth/register', {
+        name: name.trim(),
+        email: normalizedEmail,
+        password
+      });
+      return {
+        success: true,
+        requiresVerification: true,
+        email: res.data?.email || normalizedEmail,
+        message: res.data?.message || 'Verification email sent. Please check your inbox.'
+      };
     } catch (err) {
-      if (!err.response || err.code === 'ECONNABORTED' || err.message?.includes('timeout') || err.message?.includes('Network Error')) {
-        const fallbackUser = {
-          id: Date.now(),
-          name: name || email.split('@')[0],
-          email: email,
-          storageQuota: 524288000,
-          usedStorage: 0,
-          role: "ROLE_STUDENT"
-        };
-        const fallbackToken = "demo-session-token-" + Date.now();
-        localStorage.setItem('token', fallbackToken);
-        localStorage.setItem('user', JSON.stringify(fallbackUser));
-        setToken(fallbackToken);
-        setUser(fallbackUser);
-        return { success: true };
-      }
-      const message = err.response?.data?.message || 'Registration failed.';
+      const message = err.response?.data?.message || 'Registration failed. Please verify the information entered.';
       setError(message);
       return { success: false, error: message };
+    }
+  };
+
+  const verifyOtp = async (email, otp) => {
+    setError(null);
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await api.post('/auth/verify-otp', {
+        email: normalizedEmail,
+        otp: otp.trim()
+      });
+      const { token: jwtToken, user: userData, message } = res.data;
+      if (jwtToken && userData) {
+        localStorage.setItem('token', jwtToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setToken(jwtToken);
+        setUser(userData);
+      }
+      return { success: true, message: message || 'Email verified successfully!', user: userData };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Invalid verification code. Please try again.';
+      setError(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const verifyToken = async (verificationToken) => {
+    setError(null);
+    try {
+      const res = await api.get('/auth/verify-link', {
+        params: { token: verificationToken.trim() }
+      });
+      const { token: jwtToken, user: userData, message } = res.data;
+      if (jwtToken && userData) {
+        localStorage.setItem('token', jwtToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setToken(jwtToken);
+        setUser(userData);
+      }
+      return { success: true, message: message || 'Email verified successfully!', user: userData };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Invalid or expired verification link.';
+      setError(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const resendVerification = async (email) => {
+    setError(null);
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await api.post('/auth/resend-verification', {
+        email: normalizedEmail
+      });
+      return {
+        success: true,
+        message: res.data?.message || 'Verification code resent successfully.',
+        cooldownSeconds: res.data?.cooldownSeconds || 60
+      };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to resend verification code.';
+      setError(message);
+      return {
+        success: false,
+        error: message,
+        isRateLimited: err.response?.status === 429,
+        cooldownSeconds: err.response?.data?.cooldownSeconds
+      };
     }
   };
 
@@ -136,7 +173,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        error,
+        login,
+        register,
+        verifyOtp,
+        verifyToken,
+        resendVerification,
+        logout,
+        isAuthenticated: !!token
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
