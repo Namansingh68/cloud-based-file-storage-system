@@ -20,11 +20,20 @@ public class DataSourceConfig {
                 if (bean instanceof DataSourceProperties props) {
                     String url = props.getUrl();
                     if (url != null) {
+                        // Strip all accidental spaces or line-breaks from copy-pasting in cloud dashboards
+                        url = url.trim().replaceAll("\\s+", "");
                         if (url.startsWith("postgresql://") || url.startsWith("postgres://")) {
-                            props.setUrl("jdbc:" + url);
+                            url = "jdbc:" + url;
                         }
+                        if (url.contains("pooler.supabase.com") && !url.contains("connectTimeout")) {
+                            url = url.contains("?") ? url + "&connectTimeout=10&socketTimeout=30" : url + "?sslmode=require&connectTimeout=10&socketTimeout=30";
+                        }
+                        props.setUrl(url);
                     }
-                    logger.info("DataSource initialized: URL={}, Username={}", props.getUrl(), props.getUsername());
+                    if (props.getUsername() != null) {
+                        props.setUsername(props.getUsername().trim().replaceAll("\\s+", ""));
+                    }
+                    logger.info("DataSource initialized successfully: URL={}, Username={}", props.getUrl(), props.getUsername());
                 }
                 return bean;
             }
