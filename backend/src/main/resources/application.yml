@@ -84,9 +84,12 @@ spring:
     hikari:
       maximum-pool-size: 8
       minimum-idle: 2
-      connection-timeout: 20000
+      connection-timeout: 15000
       idle-timeout: 300000
       max-lifetime: 1800000
+      data-source-properties:
+        connectTimeout: 10
+        socketTimeout: 30
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
