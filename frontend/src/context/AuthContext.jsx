@@ -3,6 +3,16 @@ import api from '../services/api';
 
 const AuthContext = createContext(null);
 
+const extractErrorMessage = (err, fallbackMsg) => {
+  if (!err.response) {
+    if (err.code === 'ECONNABORTED' || err.message?.toLowerCase().includes('timeout')) {
+      return 'Server response timed out. The backend service may be waking up, please wait a moment and try again.';
+    }
+    return 'Unable to reach the CloudVault backend server. Please check your backend connection or wait for the service to wake up.';
+  }
+  return err.response.data?.message || fallbackMsg;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
@@ -69,7 +79,7 @@ export const AuthProvider = ({ children }) => {
           error: message
         };
       }
-      const message = err.response?.data?.message || 'Invalid email or password.';
+      const message = extractErrorMessage(err, 'Invalid email or password.');
       setError(message);
       return { success: false, error: message };
     }
@@ -91,7 +101,7 @@ export const AuthProvider = ({ children }) => {
         message: res.data?.message || 'Verification email sent. Please check your inbox.'
       };
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed. Please verify the information entered.';
+      const message = extractErrorMessage(err, 'Registration failed. Please verify the information entered.');
       setError(message);
       return { success: false, error: message };
     }
@@ -114,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true, message: message || 'Email verified successfully!', user: userData };
     } catch (err) {
-      const message = err.response?.data?.message || 'Invalid verification code. Please try again.';
+      const message = extractErrorMessage(err, 'Invalid verification code. Please try again.');
       setError(message);
       return { success: false, error: message };
     }
@@ -135,7 +145,7 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: true, message: message || 'Email verified successfully!', user: userData };
     } catch (err) {
-      const message = err.response?.data?.message || 'Invalid or expired verification link.';
+      const message = extractErrorMessage(err, 'Invalid or expired verification link.');
       setError(message);
       return { success: false, error: message };
     }
@@ -154,7 +164,7 @@ export const AuthProvider = ({ children }) => {
         cooldownSeconds: res.data?.cooldownSeconds || 60
       };
     } catch (err) {
-      const message = err.response?.data?.message || 'Failed to resend verification code.';
+      const message = extractErrorMessage(err, 'Failed to resend verification code.');
       setError(message);
       return {
         success: false,
