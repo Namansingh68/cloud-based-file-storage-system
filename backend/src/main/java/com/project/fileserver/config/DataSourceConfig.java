@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class DataSourceConfig {
 
     @Bean
-    public BeanPostProcessor dataSourcePropertiesPostProcessor() {
+    public static BeanPostProcessor dataSourcePropertiesPostProcessor() {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) {
