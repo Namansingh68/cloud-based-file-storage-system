@@ -32,7 +32,7 @@ public class User {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "boolean default false")
     private boolean emailVerified = false;
 
     @com.fasterxml.jackson.annotation.JsonIgnore
@@ -46,7 +46,7 @@ public class User {
     @Column
     private LocalDateTime verificationOtpExpiry;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "integer default 0")
     private int verificationAttempts = 0;
 
     @Column
