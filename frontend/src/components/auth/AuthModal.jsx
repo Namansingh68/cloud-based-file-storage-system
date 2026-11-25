@@ -30,6 +30,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [slowWakeWarning, setSlowWakeWarning] = useState(false);
   const [error, setError] = useState(null);
   const [successInfo, setSuccessInfo] = useState(null);
 
@@ -52,6 +53,13 @@ export const AuthModal = ({ isOpen, onClose }) => {
     }, 1000);
     return () => clearInterval(interval);
   }, [cooldown]);
+
+  // Show helpful status hint if request takes >5s (e.g. Render cold start)
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setSlowWakeWarning(true), 5000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // Reset errors when modal opens or mode changes
   useEffect(() => {
@@ -76,6 +84,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
       return;
     }
 
+    setSlowWakeWarning(false);
     setLoading(true);
 
     if (authMode === 'login') {
@@ -167,6 +176,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
       return;
     }
 
+    setSlowWakeWarning(false);
     setLoading(true);
     const res = await verifyOtp(targetEmail, fullOtp);
     setLoading(false);
@@ -404,6 +414,12 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   </span>
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
+
+                {loading && slowWakeWarning && (
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+                    Cloud server is waking up — this first request can take up to a minute...
+                  </p>
+                )}
               </form>
 
               {/* Demo Account Quick-Fill Helper */}
@@ -471,6 +487,12 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   <span>{loading ? 'Verifying Code...' : 'Verify & Activate Account'}</span>
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
+
+                {loading && slowWakeWarning && (
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+                    Cloud server is waking up — this first request can take up to a minute...
+                  </p>
+                )}
               </form>
 
               {/* Resend Verification Code with Cooldown */}

@@ -163,4 +163,11 @@ public class AuthControllerTest {
         assertEquals(1, pendingUser.getVerificationAttempts());
         assertFalse(pendingUser.isEmailVerified());
     }
+
+    @Test
+    void health_shouldReturnUpStatus() {
+        ResponseEntity<Map<String, String>> response = authController.health();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("UP", response.getBody().get("status"));
+    }
 }

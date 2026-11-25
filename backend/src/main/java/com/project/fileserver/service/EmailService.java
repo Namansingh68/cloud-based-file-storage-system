@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -50,16 +51,28 @@ public class EmailService {
     @Value("${RESEND_API_KEY:${app.mail.resend-api-key:}}")
     private String resendApiKey;
 
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(6))
+            .build();
+
     /**
-     * Send email verification with 6-digit OTP and single-use verification link.
+     * Dispatch verification email asynchronously so signup/resend HTTP requests never block on external mail APIs.
      *
      * @param toEmail recipient email address
      * @param userName recipient display name
      * @param otp 6-digit one-time password
      * @param verificationToken secure single-use token for one-click verification link
-     * @return true if email was dispatched successfully
      */
-    public boolean sendVerificationEmail(String toEmail, String userName, String otp, String verificationToken) {
+    @Async("emailTaskExecutor")
+    public void sendVerificationEmail(String toEmail, String userName, String otp, String verificationToken) {
+        try {
+            sendVerificationEmailSync(toEmail, userName, otp, verificationToken);
+        } catch (Exception e) {
+            logger.error("Unexpected async error while dispatching verification email to {}: {}", maskEmail(toEmail), e.getMessage());
+        }
+    }
+
+    boolean sendVerificationEmailSync(String toEmail, String userName, String otp, String verificationToken) {
         String verificationLink = frontendUrl + "/?verifyToken=" + verificationToken;
         String subject = "Verify your CloudVault account - " + otp;
         String htmlContent = buildHtmlVerificationEmail(userName, otp, verificationLink);
@@ -70,14 +83,30 @@ public class EmailService {
 
         // 1. Try Brevo HTTPS API (Port 443 - never blocked on cloud platforms)
         if (brevoApiKey != null && !brevoApiKey.isBlank()) {
-            boolean sent = sendViaBrevoApi(toEmail, userName, subject, htmlContent);
-            if (sent) return true;
+            String senderEmail = (fromAddress != null && fromAddress.contains("@") && !fromAddress.contains("noreply@cloudvault.app"))
+                    ? fromAddress : (smtpUsername != null && smtpUsername.contains("@") ? smtpUsername : "noreply@cloudvault.app");
+            Map<String, Object> brevoPayload = Map.of(
+                    "sender", Map.of("name", senderName, "email", senderEmail),
+                    "to", List.of(Map.of("email", toEmail, "name", userName != null ? userName : "User")),
+                    "subject", subject,
+                    "htmlContent", htmlContent
+            );
+            if (sendViaHttpsApi("Brevo", "https://api.brevo.com/v3/smtp/email", "api-key", brevoApiKey.trim(), brevoPayload, toEmail)) {
+                return true;
+            }
         }
 
         // 2. Try Resend HTTPS API (Port 443 - never blocked on cloud platforms)
         if (resendApiKey != null && !resendApiKey.isBlank()) {
-            boolean sent = sendViaResendApi(toEmail, userName, subject, htmlContent);
-            if (sent) return true;
+            Map<String, Object> resendPayload = Map.of(
+                    "from", senderName + " <onboarding@resend.dev>",
+                    "to", List.of(toEmail),
+                    "subject", subject,
+                    "html", htmlContent
+            );
+            if (sendViaHttpsApi("Resend", "https://api.resend.com/emails", "Authorization", "Bearer " + resendApiKey.trim(), resendPayload, toEmail)) {
+                return true;
+            }
         }
 
         // 3. Fallback to JavaMailSender SMTP (Port 587)
@@ -111,80 +140,34 @@ public class EmailService {
         }
     }
 
-    private boolean sendViaBrevoApi(String toEmail, String userName, String subject, String htmlContent) {
+    private boolean sendViaHttpsApi(
+            String providerName,
+            String endpoint,
+            String authHeaderName,
+            String authHeaderValue,
+            Map<String, Object> payload,
+            String toEmail
+    ) {
         try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(8))
-                    .build();
-
-            String senderEmail = (fromAddress != null && fromAddress.contains("@") && !fromAddress.contains("noreply@cloudvault.app"))
-                    ? fromAddress : (smtpUsername != null && smtpUsername.contains("@") ? smtpUsername : "noreply@cloudvault.app");
-
-            Map<String, Object> payload = Map.of(
-                    "sender", Map.of("name", senderName, "email", senderEmail),
-                    "to", List.of(Map.of("email", toEmail, "name", userName != null ? userName : "User")),
-                    "subject", subject,
-                    "htmlContent", htmlContent
-            );
-
             String jsonPayload = objectMapper.writeValueAsString(payload);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .uri(URI.create(endpoint))
                     .header("Content-Type", "application/json")
-                    .header("api-key", brevoApiKey.trim())
+                    .header(authHeaderName, authHeaderValue)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
-                    .timeout(Duration.ofSeconds(12))
+                    .timeout(Duration.ofSeconds(10))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                logger.info("Email dispatched successfully via Brevo HTTPS API to {}", maskEmail(toEmail));
+                logger.info("Email dispatched successfully via {} HTTPS API to {}", providerName, maskEmail(toEmail));
                 return true;
-            } else {
-                logger.warn("Brevo API responded with status {}: {}", response.statusCode(), response.body());
-                return false;
             }
-        } catch (Exception e) {
-            logger.error("Failed to send email via Brevo HTTPS API: {}", e.getMessage());
+            logger.warn("{} API responded with status {}: {}", providerName, response.statusCode(), response.body());
             return false;
-        }
-    }
-
-    private boolean sendViaResendApi(String toEmail, String userName, String subject, String htmlContent) {
-        try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(8))
-                    .build();
-
-            String sender = senderName + " <onboarding@resend.dev>";
-            Map<String, Object> payload = Map.of(
-                    "from", sender,
-                    "to", List.of(toEmail),
-                    "subject", subject,
-                    "html", htmlContent
-            );
-
-            String jsonPayload = objectMapper.writeValueAsString(payload);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.resend.com/emails"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + resendApiKey.trim())
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
-                    .timeout(Duration.ofSeconds(12))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                logger.info("Email dispatched successfully via Resend HTTPS API to {}", maskEmail(toEmail));
-                return true;
-            } else {
-                logger.warn("Resend API responded with status {}: {}", response.statusCode(), response.body());
-                return false;
-            }
         } catch (Exception e) {
-            logger.error("Failed to send email via Resend HTTPS API: {}", e.getMessage());
+            logger.error("Failed to send email via {} HTTPS API: {}", providerName, e.getMessage());
             return false;
         }
     }

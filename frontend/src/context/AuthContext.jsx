@@ -6,9 +6,12 @@ const AuthContext = createContext(null);
 const extractErrorMessage = (err, fallbackMsg) => {
   if (!err.response) {
     if (err.code === 'ECONNABORTED' || err.message?.toLowerCase().includes('timeout')) {
-      return 'Server response timed out. The backend service may be waking up, please wait a moment and try again.';
+      return 'Server response timed out. The backend service may still be waking up, please wait a moment and try again.';
     }
     return 'Unable to reach the CloudVault backend server. Please check your backend connection or wait for the service to wake up.';
+  }
+  if (err.response.status >= 502 && err.response.status <= 504) {
+    return 'The cloud backend is finishing startup. Please wait a moment and try again.';
   }
   return err.response.data?.message || fallbackMsg;
 };
@@ -49,6 +52,8 @@ export const AuthProvider = ({ children }) => {
       } else {
         setUser(null);
         setToken(null);
+        // Proactively wake sleeping cloud backend (Render free tier) on page load
+        api.get('/auth/health', { timeout: 90000 }).catch(() => {});
       }
       setLoading(false);
     };

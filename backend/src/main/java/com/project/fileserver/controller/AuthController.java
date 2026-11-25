@@ -47,6 +47,15 @@ public class AuthController {
     private AuthSecurityService authSecurityService;
 
     /**
+     * Lightweight health check endpoint used to wake sleeping cloud instances without DB overhead.
+     */
+    @GetMapping("/health")
+    @Operation(summary = "Lightweight health check endpoint for backend wake-up")
+    public ResponseEntity<Map<String, String>> health() {
+        return ResponseEntity.ok(Map.of("status", "UP"));
+    }
+
+    /**
      * Register a new user account with mandatory email verification.
      */
     @PostMapping("/register")
