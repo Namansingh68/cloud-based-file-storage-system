@@ -36,7 +36,7 @@ public class EmailService {
     @Value("${app.mail.from:noreply@cloudvault.app}")
     private String fromAddress;
 
-    @Value("${app.mail.sender-name:CloudVault Security}")
+    @Value("${app.mail.sender-name:CloudVault}")
     private String senderName;
 
     @Value("${app.frontend-url:https://cloud-based-file-storage-system-delta.vercel.app}")
@@ -74,7 +74,7 @@ public class EmailService {
 
     boolean sendVerificationEmailSync(String toEmail, String userName, String otp, String verificationToken) {
         String verificationLink = frontendUrl + "/?verifyToken=" + verificationToken;
-        String subject = "Verify your CloudVault account - " + otp;
+        String subject = "Verify your CloudVault account";
         String htmlContent = buildHtmlVerificationEmail(userName, otp, verificationLink);
         String plainText = buildPlainTextVerificationEmail(userName, otp, verificationLink);
 
@@ -87,8 +87,10 @@ public class EmailService {
                     ? fromAddress : (smtpUsername != null && smtpUsername.contains("@") ? smtpUsername : "noreply@cloudvault.app");
             Map<String, Object> brevoPayload = Map.of(
                     "sender", Map.of("name", senderName, "email", senderEmail),
+                    "replyTo", Map.of("name", senderName, "email", senderEmail),
                     "to", List.of(Map.of("email", toEmail, "name", userName != null ? userName : "User")),
                     "subject", subject,
+                    "textContent", plainText,
                     "htmlContent", htmlContent
             );
             if (sendViaHttpsApi("Brevo", "https://api.brevo.com/v3/smtp/email", "api-key", brevoApiKey.trim(), brevoPayload, toEmail)) {
@@ -98,10 +100,14 @@ public class EmailService {
 
         // 2. Try Resend HTTPS API (Port 443 - never blocked on cloud platforms)
         if (resendApiKey != null && !resendApiKey.isBlank()) {
+            String senderEmail = (fromAddress != null && fromAddress.contains("@") && !fromAddress.contains("noreply@cloudvault.app"))
+                    ? fromAddress : (smtpUsername != null && smtpUsername.contains("@") ? smtpUsername : "noreply@cloudvault.app");
             Map<String, Object> resendPayload = Map.of(
                     "from", senderName + " <onboarding@resend.dev>",
+                    "reply_to", senderEmail,
                     "to", List.of(toEmail),
                     "subject", subject,
+                    "text", plainText,
                     "html", htmlContent
             );
             if (sendViaHttpsApi("Resend", "https://api.resend.com/emails", "Authorization", "Bearer " + resendApiKey.trim(), resendPayload, toEmail)) {
@@ -173,66 +179,50 @@ public class EmailService {
     }
 
     private String buildHtmlVerificationEmail(String userName, String otp, String verificationLink) {
-        String safeName = (userName != null && !userName.isBlank()) ? userName : "CloudVault User";
+        String safeName = escapeHtml((userName != null && !userName.isBlank()) ? userName.trim() : "there");
 
         return "<!DOCTYPE html>"
                 + "<html>"
                 + "<head>"
                 + "<meta charset='UTF-8'>"
                 + "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                + "<title>Verify your CloudVault Account</title>"
+                + "<title>Verify your CloudVault account</title>"
                 + "</head>"
-                + "<body style='margin:0;padding:0;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#334155;'>"
-                + "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color:#0f172a;padding:40px 15px;'>"
+                + "<body style='margin:0;padding:0;background-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#1e293b;'>"
+                + "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color:#f8fafc;padding:32px 16px;'>"
                 + "<tr><td align='center'>"
-                + "<table role='presentation' width='100%' style='max-width:540px;background-color:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);' cellspacing='0' cellpadding='0' border='0'>"
-                // Header Gradient Banner
+                + "<table role='presentation' width='100%' style='max-width:520px;background-color:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;' cellspacing='0' cellpadding='0' border='0'>"
                 + "<tr>"
-                + "<td style='background:linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #7c3aed 100%);padding:36px 32px;text-align:center;'>"
-                + "<div style='display:inline-block;width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:16px;line-height:52px;text-align:center;margin-bottom:12px;'>"
-                + "<span style='font-size:26px;'>🔒</span>"
-                + "</div>"
-                + "<h1 style='margin:0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;'>CloudVault</h1>"
-                + "<p style='margin:4px 0 0 0;color:rgba(255,255,255,0.85);font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600;'>Security & Identity Verification</p>"
+                + "<td style='background-color:#4f46e5;padding:24px 32px;text-align:left;'>"
+                + "<h1 style='margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;'>CloudVault</h1>"
+                + "<p style='margin:4px 0 0 0;color:#e0e7ff;font-size:12px;'>Account Email Verification</p>"
                 + "</td>"
                 + "</tr>"
-                // Body
                 + "<tr>"
-                + "<td style='padding:36px 32px;'>"
-                + "<h2 style='margin:0 0 12px 0;color:#0f172a;font-size:18px;font-weight:700;'>Hello " + safeName + ",</h2>"
-                + "<p style='margin:0 0 24px 0;color:#475569;font-size:14px;line-height:1.6;'>"
-                + "Thank you for registering with <strong>CloudVault</strong>. To protect your document storage and ensure that you own this email address, please use the 6-digit verification code below:"
+                + "<td style='padding:28px 32px;'>"
+                + "<p style='margin:0 0 16px 0;color:#0f172a;font-size:15px;font-weight:600;'>Hi " + safeName + ",</p>"
+                + "<p style='margin:0 0 20px 0;color:#475569;font-size:14px;line-height:1.6;'>"
+                + "Use this 6-digit verification code to finish setting up your CloudVault account. The code expires in 15 minutes and works once."
                 + "</p>"
-                // OTP Box
-                + "<div style='background:#f8fafc;border:2px dashed #cbd5e1;border-radius:18px;padding:24px;text-align:center;margin-bottom:28px;'>"
-                + "<div style='font-size:11px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;'>One-Time Verification Code</div>"
-                + "<div style='font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:36px;font-weight:800;letter-spacing:10px;color:#4f46e5;padding-left:10px;'>"
+                + "<div style='background-color:#f1f5f9;border-radius:12px;padding:18px;text-align:center;margin-bottom:24px;'>"
+                + "<div style='font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#4f46e5;padding-left:8px;'>"
                 + otp
                 + "</div>"
-                + "<div style='font-size:12px;color:#94a3b8;margin-top:8px;'>⏱ Valid for <strong>15 minutes</strong> • Single use only</div>"
                 + "</div>"
-                // One-Click Button
-                + "<p style='margin:0 0 12px 0;color:#475569;font-size:14px;line-height:1.6;text-align:center;'>Or activate your account with one click:</p>"
-                + "<div style='text-align:center;margin-bottom:28px;'>"
-                + "<a href='" + verificationLink + "' target='_blank' style='display:inline-block;background:linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 32px;border-radius:12px;box-shadow:0 10px 15px -3px rgba(79,70,229,0.3);'>Verify Email Address →</a>"
-                + "</div>"
-                + "<p style='margin:0 0 8px 0;color:#94a3b8;font-size:12px;line-height:1.5;'>"
-                + "If the button doesn't work, copy and paste this secure URL into your browser:<br>"
-                + "<a href='" + verificationLink + "' style='color:#6366f1;word-break:break-all;font-size:11px;'>" + verificationLink + "</a>"
+                + "<p style='margin:0 0 16px 0;color:#475569;font-size:14px;line-height:1.6;'>"
+                + "Or verify directly with the button below:"
                 + "</p>"
-                + "<hr style='border:none;border-top:1px solid #f1f5f9;margin:28px 0;'>"
-                + "<div style='background:#fef2f2;border-left:4px solid #ef4444;padding:12px 16px;border-radius:8px;'>"
-                + "<p style='margin:0;color:#991b1b;font-size:12px;line-height:1.5;'>"
-                + "<strong>Security Advisory:</strong> If you did not create a CloudVault account, someone may have entered your email by mistake. You can safely ignore this email; no account will be activated without this verification code."
-                + "</p>"
+                + "<div style='margin-bottom:24px;'>"
+                + "<a href='" + verificationLink + "' style='display:inline-block;background-color:#4f46e5;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 24px;border-radius:10px;'>Verify Email Address</a>"
                 + "</div>"
+                + "<p style='margin:0;color:#64748b;font-size:12px;line-height:1.5;'>"
+                + "If you did not sign up for CloudVault, you can safely ignore this message."
+                + "</p>"
                 + "</td>"
                 + "</tr>"
-                // Footer
                 + "<tr>"
-                + "<td style='background:#f8fafc;padding:20px 32px;text-align:center;border-top:1px solid #e2e8f0;'>"
-                + "<p style='margin:0;color:#94a3b8;font-size:11px;'>CloudVault Document Management System • BIT Mesra</p>"
-                + "<p style='margin:4px 0 0 0;color:#cbd5e1;font-size:10px;'>Protected by 256-bit AES Storage & BCrypt Encryption</p>"
+                + "<td style='background-color:#f8fafc;padding:16px 32px;border-top:1px solid #e2e8f0;'>"
+                + "<p style='margin:0;color:#94a3b8;font-size:11px;'>CloudVault Document Management System - BIT Mesra</p>"
                 + "</td>"
                 + "</tr>"
                 + "</table>"
@@ -243,15 +233,25 @@ public class EmailService {
     }
 
     private String buildPlainTextVerificationEmail(String userName, String otp, String verificationLink) {
-        String safeName = (userName != null && !userName.isBlank()) ? userName : "CloudVault User";
-        return "Hello " + safeName + ",\n\n"
+        String safeName = (userName != null && !userName.isBlank()) ? userName.trim() : "there";
+        return "Hi " + safeName + ",\n\n"
                 + "Thank you for registering with CloudVault.\n\n"
                 + "Your 6-digit verification code is: " + otp + "\n"
-                + "This code is valid for 15 minutes and can only be used once.\n\n"
-                + "Alternatively, you can verify your account by visiting the link below:\n"
+                + "This code expires in 15 minutes and can only be used once.\n\n"
+                + "Alternatively, open this link to verify your account:\n"
                 + verificationLink + "\n\n"
                 + "If you did not create a CloudVault account, please disregard this message.\n\n"
-                + "Best regards,\nCloudVault Security Team";
+                + "Regards,\nCloudVault Team";
+    }
+
+    private String escapeHtml(String input) {
+        if (input == null) return "";
+        return input
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private String maskEmail(String email) {

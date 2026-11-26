@@ -490,6 +490,10 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   <span>Single-use OTP</span>
                 </div>
 
+                <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+                  Didn&apos;t see it? Check your <strong>Spam</strong> or <strong>Promotions</strong> folder.
+                </p>
+
                 <button
                   type="submit"
                   disabled={loading || otpDigits.join('').length !== 6}

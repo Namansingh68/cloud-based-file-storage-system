@@ -10,7 +10,9 @@ import {
   Plus,
   Search,
   LayoutGrid,
-  List
+  List,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import { useDrive } from '../../context/DriveContext';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -28,6 +30,9 @@ export const ExplorerView = () => {
   const {
     folders,
     files,
+    loading,
+    error,
+    fetchContents,
     isTrashView,
     viewMode,
     setViewMode,
@@ -196,8 +201,36 @@ export const ExplorerView = () => {
               </div>
             </div>
 
-            {/* Empty State when no folders or files exist */}
-            {sortedFolders.length === 0 && sortedFiles.length === 0 ? (
+            {/* Loading, Error, or Empty State */}
+            {loading && sortedFolders.length === 0 && sortedFiles.length === 0 ? (
+              <div className="text-center py-16 sm:py-20 px-4 bg-slate-50/60 dark:bg-slate-900/40 rounded-3xl border border-slate-200/70 dark:border-slate-800">
+                <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <RefreshCw className="w-6 h-6 animate-spin" />
+                </div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">
+                  Loading your files...
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Fetching your encrypted folders and documents from CloudVault.
+                </p>
+              </div>
+            ) : error && sortedFolders.length === 0 && sortedFiles.length === 0 ? (
+              <div className="text-center py-16 px-4 bg-rose-50/50 dark:bg-rose-950/20 rounded-3xl border border-dashed border-rose-200 dark:border-rose-900/50">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto mb-3">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                  {error}
+                </h3>
+                <button
+                  onClick={() => fetchContents(currentFolder?.id || null)}
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Try Again</span>
+                </button>
+              </div>
+            ) : sortedFolders.length === 0 && sortedFiles.length === 0 ? (
               searchQuery ? (
                 /* Search Not Found State */
                 <div className="text-center py-16 px-4 bg-slate-50/60 dark:bg-slate-900/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">

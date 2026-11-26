@@ -41,7 +41,7 @@ app:
   frontend-url: ${APP_FRONTEND_URL:https://cloud-based-file-storage-system-delta.vercel.app}
   mail:
     from: ${APP_MAIL_FROM:noreply@cloudvault.app}
-    sender-name: ${APP_MAIL_SENDER_NAME:CloudVault Security}
+    sender-name: ${APP_MAIL_SENDER_NAME:CloudVault}
     otp-expiration-minutes: 15
     resend-cooldown-seconds: 60
 

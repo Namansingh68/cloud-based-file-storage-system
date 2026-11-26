@@ -13,10 +13,12 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useDrive } from '../../context/DriveContext';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
 export const ActivityDrawer = () => {
   const { isActivityOpen, setIsActivityOpen } = useDrive();
+  const { isAuthenticated } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,17 +59,17 @@ export const ActivityDrawer = () => {
   ];
 
   const fetchActivities = async () => {
+    if (!isAuthenticated) {
+      setActivities(DEFAULT_ACTIVITIES);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get('/activity');
-      if (res.data && res.data.length > 0) {
-        setActivities(res.data);
-      } else {
-        setActivities(DEFAULT_ACTIVITIES);
-      }
+      setActivities(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.warn('Activity fetch fallback:', err);
-      setActivities(DEFAULT_ACTIVITIES);
+      console.warn('Activity fetch failed:', err);
+      setActivities([]);
     } finally {
       setLoading(false);
     }

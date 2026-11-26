@@ -52,13 +52,33 @@ export const DriveProvider = ({ children }) => {
     }
   ];
 
+  const EMPTY_STORAGE_STATS = {
+    usedBytes: 0,
+    quotaBytes: 524288000, // 500 MB
+    usedPercentage: 0,
+    fileCount: 0,
+    folderCount: 0
+  };
+
+  const DEMO_STORAGE_STATS = {
+    usedBytes: 8325393,
+    quotaBytes: 524288000, // 500 MB
+    usedPercentage: 2,
+    fileCount: 4,
+    folderCount: 3
+  };
+
   const [currentFolder, setCurrentFolder] = useState(null); // null = root
   const [breadcrumbs, setBreadcrumbs] = useState([{ id: null, name: 'My Drive' }]);
-  const [folders, setFolders] = useState(INITIAL_FOLDERS);
-  const [files, setFiles] = useState(INITIAL_FILES);
+  // Keep authenticated drive strictly empty until fetched from backend; demo items are guest-only
+  const [folders, setFolders] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [demoFolders, setDemoFolders] = useState(INITIAL_FOLDERS);
+  const [demoFiles, setDemoFiles] = useState(INITIAL_FILES);
   const [trashItems, setTrashItems] = useState({ files: [], folders: [] });
   const [isTrashView, setIsTrashView] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => isAuthenticated);
+  const [hasLoadedAuthDrive, setHasLoadedAuthDrive] = useState(false);
   const [error, setError] = useState(null);
 
   // Mobile layout state
@@ -120,13 +140,26 @@ export const DriveProvider = ({ children }) => {
   const [activeItemMenu, setActiveItemMenu] = useState(null);
 
   // Storage Stats (Default 500MB per SRS FR-18)
-  const [storageStats, setStorageStats] = useState({
-    usedBytes: 8325393,
-    quotaBytes: 524288000, // 500 MB
-    usedPercentage: 2,
-    fileCount: 4,
-    folderCount: 3
-  });
+  const [storageStats, setStorageStats] = useState(EMPTY_STORAGE_STATS);
+  const [demoStorageStats, setDemoStorageStats] = useState(DEMO_STORAGE_STATS);
+
+  // Clear authenticated user state immediately on sign-out so subsequent logins never flash old data
+  useEffect(() => {
+    const resetDriveState = () => {
+      setFolders([]);
+      setFiles([]);
+      setTrashItems({ files: [], folders: [] });
+      setCurrentFolder(null);
+      setBreadcrumbs([{ id: null, name: 'My Drive' }]);
+      setIsTrashView(false);
+      setStorageStats(EMPTY_STORAGE_STATS);
+      setHasLoadedAuthDrive(false);
+      setError(null);
+      setLoading(false);
+    };
+    window.addEventListener('auth-logout', resetDriveState);
+    return () => window.removeEventListener('auth-logout', resetDriveState);
+  }, []);
 
   // Fetch current folder contents or search
   const fetchContents = useCallback(async (folderId = currentFolder?.id || null) => {
@@ -170,9 +203,11 @@ export const DriveProvider = ({ children }) => {
         }
       }
     } catch (err) {
-      console.warn('API fetch warning, using local state fallback for presentation resilience:', err);
+      console.warn('API fetch failed:', err);
+      setError('Unable to load your files right now. Please refresh or try again.');
     } finally {
       setLoading(false);
+      setHasLoadedAuthDrive(true);
     }
   }, [isAuthenticated, isTrashView, currentFolder]);
 
@@ -205,6 +240,31 @@ export const DriveProvider = ({ children }) => {
 
   // Upload file with progress tracking
   const uploadFile = async (file, folderId = currentFolder?.id, onProgress) => {
+    if (!isAuthenticated) {
+      const localFile = {
+        id: Date.now(),
+        name: file.name,
+        size: file.size,
+        contentType: file.type || 'application/octet-stream',
+        createdAt: new Date().toISOString(),
+        isDeleted: false,
+        folderId: folderId || null,
+        localBlobUrl: URL.createObjectURL(file)
+      };
+      setDemoFiles(prev => [localFile, ...prev]);
+      setDemoStorageStats(prev => {
+        const newUsed = prev.usedBytes + file.size;
+        return {
+          ...prev,
+          usedBytes: newUsed,
+          usedPercentage: Math.min(100, Math.round((newUsed / prev.quotaBytes) * 100)),
+          fileCount: prev.fileCount + 1
+        };
+      });
+      showToast(`Uploaded ${file.name} (Demo Preview)`, 'success');
+      return { success: true, file: localFile };
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     if (folderId) {
@@ -225,35 +285,28 @@ export const DriveProvider = ({ children }) => {
       showToast(`Uploaded ${file.name} successfully`, 'success');
       return { success: true, file: res.data };
     } catch (err) {
-      console.warn('Backend upload offline, storing in local session state:', err);
-      // Local fallback for offline/demo presentation visitors
-      const localFile = {
-        id: Date.now(),
-        name: file.name,
-        size: file.size,
-        contentType: file.type || 'application/octet-stream',
-        createdAt: new Date().toISOString(),
-        isDeleted: false,
-        folderId: folderId || null,
-        localBlobUrl: URL.createObjectURL(file)
-      };
-      setFiles(prev => [localFile, ...prev]);
-      setStorageStats(prev => {
-        const newUsed = prev.usedBytes + file.size;
-        return {
-          ...prev,
-          usedBytes: newUsed,
-          usedPercentage: Math.min(100, Math.round((newUsed / prev.quotaBytes) * 100)),
-          fileCount: prev.fileCount + 1
-        };
-      });
-      showToast(`Uploaded ${file.name} (Local Storage)`, 'success');
-      return { success: true, file: localFile };
+      const msg = err.response?.data?.message || `Failed to upload ${file.name}.`;
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
   // Create new folder
   const createFolder = async (name) => {
+    if (!isAuthenticated) {
+      const newFolder = {
+        id: Date.now(),
+        name,
+        parentId: currentFolder?.id || null,
+        isDeleted: false,
+        createdAt: new Date().toISOString()
+      };
+      setDemoFolders(prev => [...prev, newFolder]);
+      setDemoStorageStats(prev => ({ ...prev, folderCount: prev.folderCount + 1 }));
+      showToast(`Folder "${name}" created (Demo Preview)`, 'success');
+      return { success: true, folder: newFolder };
+    }
+
     try {
       const res = await api.post('/folders', {
         name,
@@ -263,23 +316,24 @@ export const DriveProvider = ({ children }) => {
       showToast(`Folder "${name}" created`, 'success');
       return { success: true, folder: res.data };
     } catch (err) {
-      console.warn('Backend offline, creating local folder:', err);
-      const newFolder = {
-        id: Date.now(),
-        name,
-        parentId: currentFolder?.id || null,
-        isDeleted: false,
-        createdAt: new Date().toISOString()
-      };
-      setFolders(prev => [...prev, newFolder]);
-      setStorageStats(prev => ({ ...prev, folderCount: prev.folderCount + 1 }));
-      showToast(`Folder "${name}" created (Local)`, 'success');
-      return { success: true, folder: newFolder };
+      const msg = err.response?.data?.message || 'Failed to create folder.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
   // Rename file or folder
   const renameItem = async (id, type, newName) => {
+    if (!isAuthenticated) {
+      if (type === 'folder') {
+        setDemoFolders(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
+      } else {
+        setDemoFiles(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
+      }
+      showToast(`Renamed to "${newName}"`, 'success');
+      return { success: true };
+    }
+
     try {
       const endpoint = type === 'folder' ? `/folders/${id}/rename` : `/files/${id}/rename`;
       await api.put(endpoint, { newName });
@@ -287,18 +341,32 @@ export const DriveProvider = ({ children }) => {
       showToast(`Renamed to "${newName}"`, 'success');
       return { success: true };
     } catch (err) {
-      if (type === 'folder') {
-        setFolders(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
-      } else {
-        setFiles(prev => prev.map(f => f.id === id ? { ...f, name: newName } : f));
-      }
-      showToast(`Renamed to "${newName}"`, 'success');
-      return { success: true };
+      const msg = err.response?.data?.message || 'Failed to rename item.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
   // Soft delete (move to trash)
   const moveToTrash = async (id, type) => {
+    if (!isAuthenticated) {
+      if (type === 'folder') {
+        const target = demoFolders.find(f => f.id === id);
+        if (target) {
+          setDemoFolders(prev => prev.filter(f => f.id !== id));
+          setTrashItems(prev => ({ ...prev, folders: [...prev.folders, { ...target, isDeleted: true }] }));
+        }
+      } else {
+        const target = demoFiles.find(f => f.id === id);
+        if (target) {
+          setDemoFiles(prev => prev.filter(f => f.id !== id));
+          setTrashItems(prev => ({ ...prev, files: [...prev.files, { ...target, isDeleted: true }] }));
+        }
+      }
+      showToast('Moved to Trash / Recycle Bin', 'info');
+      return { success: true };
+    }
+
     try {
       const endpoint = type === 'folder' ? `/folders/${id}` : `/files/${id}`;
       await api.delete(endpoint);
@@ -306,26 +374,32 @@ export const DriveProvider = ({ children }) => {
       showToast('Moved to Trash / Recycle Bin', 'info');
       return { success: true };
     } catch (err) {
-      if (type === 'folder') {
-        const target = folders.find(f => f.id === id);
-        if (target) {
-          setFolders(prev => prev.filter(f => f.id !== id));
-          setTrashItems(prev => ({ ...prev, folders: [...prev.folders, { ...target, isDeleted: true }] }));
-        }
-      } else {
-        const target = files.find(f => f.id === id);
-        if (target) {
-          setFiles(prev => prev.filter(f => f.id !== id));
-          setTrashItems(prev => ({ ...prev, files: [...prev.files, { ...target, isDeleted: true }] }));
-        }
-      }
-      showToast('Moved to Trash / Recycle Bin', 'info');
-      return { success: true };
+      const msg = err.response?.data?.message || 'Failed to move item to Trash.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
   // Restore from trash
   const restoreFromTrash = async (id, type) => {
+    if (!isAuthenticated) {
+      if (type === 'folder') {
+        const target = trashItems.folders.find(f => f.id === id);
+        if (target) {
+          setTrashItems(prev => ({ ...prev, folders: prev.folders.filter(f => f.id !== id) }));
+          setDemoFolders(prev => [...prev, { ...target, isDeleted: false }]);
+        }
+      } else {
+        const target = trashItems.files.find(f => f.id === id);
+        if (target) {
+          setTrashItems(prev => ({ ...prev, files: prev.files.filter(f => f.id !== id) }));
+          setDemoFiles(prev => [...prev, { ...target, isDeleted: false }]);
+        }
+      }
+      showToast('Restored successfully', 'success');
+      return { success: true };
+    }
+
     try {
       const endpoint = type === 'folder' ? `/folders/${id}/restore` : `/files/${id}/restore`;
       await api.post(endpoint);
@@ -333,33 +407,15 @@ export const DriveProvider = ({ children }) => {
       showToast('Restored successfully', 'success');
       return { success: true };
     } catch (err) {
-      if (type === 'folder') {
-        const target = trashItems.folders.find(f => f.id === id);
-        if (target) {
-          setTrashItems(prev => ({ ...prev, folders: prev.folders.filter(f => f.id !== id) }));
-          setFolders(prev => [...prev, { ...target, isDeleted: false }]);
-        }
-      } else {
-        const target = trashItems.files.find(f => f.id === id);
-        if (target) {
-          setTrashItems(prev => ({ ...prev, files: prev.files.filter(f => f.id !== id) }));
-          setFiles(prev => [...prev, { ...target, isDeleted: false }]);
-        }
-      }
-      showToast('Restored successfully', 'success');
-      return { success: true };
+      const msg = err.response?.data?.message || 'Failed to restore item.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
   // Permanent Delete
   const permanentDelete = async (id, type) => {
-    try {
-      const endpoint = type === 'folder' ? `/folders/${id}/permanent` : `/files/${id}/permanent`;
-      await api.delete(endpoint);
-      await fetchContents();
-      showToast('Permanently deleted', 'warning');
-      return { success: true };
-    } catch (err) {
+    if (!isAuthenticated) {
       if (type === 'folder') {
         setTrashItems(prev => ({ ...prev, folders: prev.folders.filter(f => f.id !== id) }));
       } else {
@@ -368,10 +424,32 @@ export const DriveProvider = ({ children }) => {
       showToast('Permanently deleted', 'warning');
       return { success: true };
     }
+
+    try {
+      const endpoint = type === 'folder' ? `/folders/${id}/permanent` : `/files/${id}/permanent`;
+      await api.delete(endpoint);
+      await fetchContents();
+      showToast('Permanently deleted', 'warning');
+      return { success: true };
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to permanently delete item.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
+    }
   };
 
   // Move item to another folder
   const moveItem = async (id, type, targetFolderId) => {
+    if (!isAuthenticated) {
+      if (type === 'folder') {
+        setDemoFolders(prev => prev.map(f => f.id === id ? { ...f, parentId: targetFolderId } : f));
+      } else {
+        setDemoFiles(prev => prev.map(f => f.id === id ? { ...f, folderId: targetFolderId } : f));
+      }
+      showToast('Moved item successfully', 'success');
+      return { success: true };
+    }
+
     try {
       const endpoint = type === 'folder' ? `/folders/${id}/move` : `/files/${id}/move`;
       await api.put(endpoint, { targetFolderId });
@@ -379,18 +457,18 @@ export const DriveProvider = ({ children }) => {
       showToast('Moved item successfully', 'success');
       return { success: true };
     } catch (err) {
-      if (type === 'folder') {
-        setFolders(prev => prev.map(f => f.id === id ? { ...f, parentId: targetFolderId } : f));
-      } else {
-        setFiles(prev => prev.map(f => f.id === id ? { ...f, folderId: targetFolderId } : f));
-      }
-      showToast('Moved item successfully', 'success');
-      return { success: true };
+      const msg = err.response?.data?.message || 'Failed to move item.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
     }
   };
 
+  const activeFolders = isAuthenticated ? folders : demoFolders;
+  const activeFiles = isAuthenticated ? files : demoFiles;
+  const activeStorageStats = isAuthenticated ? storageStats : demoStorageStats;
+
   // Filtered files & folders
-  const filteredFiles = files.filter(file => {
+  const filteredFiles = activeFiles.filter(file => {
     const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
 
@@ -407,7 +485,7 @@ export const DriveProvider = ({ children }) => {
     return true;
   });
 
-  const filteredFolders = folders.filter(folder =>
+  const filteredFolders = activeFolders.filter(folder =>
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -420,7 +498,7 @@ export const DriveProvider = ({ children }) => {
       trashItems,
       isTrashView,
       setIsTrashView,
-      loading,
+      loading: loading || (isAuthenticated && !hasLoadedAuthDrive),
       error,
       searchQuery,
       setSearchQuery,
@@ -430,7 +508,7 @@ export const DriveProvider = ({ children }) => {
       setViewMode,
       sortBy,
       setSortBy,
-      storageStats,
+      storageStats: activeStorageStats,
       navigateToFolder,
       fetchContents,
       uploadFile,

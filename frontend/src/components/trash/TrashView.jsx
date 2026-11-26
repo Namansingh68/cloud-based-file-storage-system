@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, RefreshCw } from 'lucide-react';
+import { Trash2, RefreshCw, Folder } from 'lucide-react';
 import { useDrive } from '../../context/DriveContext';
 import { formatBytes, getFileDetails } from '../explorer/FileItem';
 
