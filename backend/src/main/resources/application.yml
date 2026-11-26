@@ -91,7 +91,6 @@ spring:
         connectTimeout: 10
         socketTimeout: 30
   jpa:
-    open-in-view: false
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     show-sql: false

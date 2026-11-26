@@ -1,10 +1,13 @@
 package com.project.fileserver.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "share_links")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ShareLink {
 
     @Id
@@ -27,6 +30,7 @@ public class ShareLink {
 
     private LocalDateTime expiresAt; // null for no expiration
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;

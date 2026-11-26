@@ -9,6 +9,7 @@ import com.project.fileserver.repository.FolderRepository;
 import com.project.fileserver.repository.ShareLinkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class ShareService {
 
     private static final SecureRandom secureRandom = new SecureRandom();
 
+    @Transactional
     public ShareLink createShareLink(User user, Long fileId, Long folderId, String permission, Integer expiresInHours) {
         FileMetadata file = null;
         Folder folder = null;
@@ -55,12 +57,21 @@ public class ShareService {
         return shareLinkRepository.save(shareLink);
     }
 
+    @Transactional(readOnly = true)
     public ShareLink getValidShareLink(String token) {
         ShareLink shareLink = shareLinkRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid share token"));
 
         if (shareLink.isExpired()) {
             throw new IllegalStateException("This share link has expired");
+        }
+
+        // Eagerly initialize target within transaction before controller serialization
+        if (shareLink.getFile() != null) {
+            shareLink.getFile().getName();
+        }
+        if (shareLink.getFolder() != null) {
+            shareLink.getFolder().getName();
         }
 
         return shareLink;

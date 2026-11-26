@@ -6,6 +6,7 @@ import com.project.fileserver.entity.Folder;
 import com.project.fileserver.entity.User;
 import com.project.fileserver.repository.FileContentRepository;
 import com.project.fileserver.repository.FileMetadataRepository;
+import com.project.fileserver.repository.ShareLinkRepository;
 import com.project.fileserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,9 @@ public class FileStorageService {
     private final FileMetadataRepository fileRepository;
     private final UserRepository userRepository;
     private final FileContentRepository fileContentRepository;
+
+    @Autowired(required = false)
+    private ShareLinkRepository shareLinkRepository;
 
     @Value("${app.storage.type:filesystem}")
     private String storageType;
@@ -183,7 +187,10 @@ public class FileStorageService {
 
     @Transactional
     public void permanentDelete(FileMetadata metadata, User user) {
-        // Delete binary content if in DB
+        // Delete dependent share links and binary content first to satisfy FK constraints
+        if (shareLinkRepository != null) {
+            shareLinkRepository.deleteByFile(metadata);
+        }
         fileContentRepository.deleteByFile(metadata);
 
         // Delete from local disk if exists

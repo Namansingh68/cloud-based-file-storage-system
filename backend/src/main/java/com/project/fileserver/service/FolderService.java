@@ -5,8 +5,10 @@ import com.project.fileserver.entity.Folder;
 import com.project.fileserver.entity.User;
 import com.project.fileserver.repository.FileMetadataRepository;
 import com.project.fileserver.repository.FolderRepository;
+import com.project.fileserver.repository.ShareLinkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,6 +22,9 @@ public class FolderService {
     @Autowired
     private FileMetadataRepository fileRepository;
 
+    @Autowired(required = false)
+    private ShareLinkRepository shareLinkRepository;
+
     public Folder createFolder(String name, Long parentId, User user) {
         Folder parent = null;
         if (parentId != null) {
@@ -31,6 +36,7 @@ public class FolderService {
         return folderRepository.save(folder);
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> getContents(Long folderId, User user) {
         Map<String, Object> response = new HashMap<>();
 
@@ -117,9 +123,13 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
+    @Transactional
     public void permanentDelete(Long folderId, User user) {
         Folder folder = folderRepository.findByIdAndOwner(folderId, user)
                 .orElseThrow(() -> new IllegalArgumentException("Folder not found"));
+        if (shareLinkRepository != null) {
+            shareLinkRepository.deleteByFolder(folder);
+        }
         folderRepository.delete(folder);
     }
 }
