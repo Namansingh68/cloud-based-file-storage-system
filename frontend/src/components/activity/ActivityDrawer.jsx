@@ -22,7 +22,7 @@ export const ActivityDrawer = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fallback demo activities for presentation
+  // Sample activity entries displayed before signing in
   const DEFAULT_ACTIVITIES = [
     {
       id: 1,

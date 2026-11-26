@@ -13,7 +13,7 @@ export const SharedView = ({ token, onBack }) => {
       setLoading(true);
       setError(null);
 
-      // Handle demo mode token for offline presentations
+      // Handle sample share token when viewing the unauthenticated preview
       if (token && token.startsWith('demo-share')) {
         setTimeout(() => {
           setResource({
@@ -36,7 +36,7 @@ export const SharedView = ({ token, onBack }) => {
         const res = await api.get(`/share/${token}`);
         setResource(res.data);
       } catch (err) {
-        console.warn('Share fetch error, providing demo fallback:', err);
+        console.warn('Failed to load shared resource:', err);
         setError(err.response?.data?.message || 'Shared link is invalid or has expired.');
       } finally {
         setLoading(false);
@@ -162,7 +162,7 @@ export const SharedView = ({ token, onBack }) => {
 
       {/* Footer */}
       <footer className="py-4 text-center text-[10px] text-slate-400">
-        CloudVault Document Management System • Presentation Release
+        CloudVault Document Management System • BIT Mesra
       </footer>
     </div>
   );

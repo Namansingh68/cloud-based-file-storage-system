@@ -443,7 +443,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                     className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-brand-500" />
-                    <span>Demo Account (One-Click Fill)</span>
+                    <span>Fill Sample Account</span>
                   </button>
                 </div>
               )}

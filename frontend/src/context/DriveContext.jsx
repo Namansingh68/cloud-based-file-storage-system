@@ -7,7 +7,7 @@ const DriveContext = createContext(null);
 export const DriveProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
 
-  // Initial demonstration items for presentation and offline resiliency
+  // Sample preview items displayed before signing in
   const INITIAL_FOLDERS = [
     { id: 101, name: 'Semester 5 Coursework', isDeleted: false, createdAt: '2026-09-20T10:00:00' },
     { id: 102, name: 'Documentation & SRS', isDeleted: false, createdAt: '2026-09-21T11:30:00' },
@@ -261,7 +261,7 @@ export const DriveProvider = ({ children }) => {
           fileCount: prev.fileCount + 1
         };
       });
-      showToast(`Uploaded ${file.name} (Demo Preview)`, 'success');
+      showToast(`Uploaded ${file.name} (Preview)`, 'success');
       return { success: true, file: localFile };
     }
 
@@ -303,7 +303,7 @@ export const DriveProvider = ({ children }) => {
       };
       setDemoFolders(prev => [...prev, newFolder]);
       setDemoStorageStats(prev => ({ ...prev, folderCount: prev.folderCount + 1 }));
-      showToast(`Folder "${name}" created (Demo Preview)`, 'success');
+      showToast(`Folder "${name}" created (Preview)`, 'success');
       return { success: true, folder: newFolder };
     }
 

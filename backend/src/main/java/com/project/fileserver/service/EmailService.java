@@ -78,8 +78,8 @@ public class EmailService {
         String htmlContent = buildHtmlVerificationEmail(userName, otp, verificationLink);
         String plainText = buildPlainTextVerificationEmail(userName, otp, verificationLink);
 
-        // ALWAYS log the OTP and verification link so developers / evaluators / logs can verify immediately
-        logger.info("[OTP VERIFICATION DISPATCH] Recipient: {}, OTP Code: {}, Activation Link: {}", toEmail, otp, verificationLink);
+        // Log verification dispatch details for server-side debugging
+        logger.info("[OTP VERIFICATION DISPATCH] Recipient: {}, Activation Link ready", maskEmail(toEmail));
 
         // 1. Try Brevo HTTPS API (Port 443 - never blocked on cloud platforms)
         if (brevoApiKey != null && !brevoApiKey.isBlank()) {
