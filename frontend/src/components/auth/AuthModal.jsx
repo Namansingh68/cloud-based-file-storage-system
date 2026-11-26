@@ -20,7 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useDrive } from '../../context/DriveContext';
 
 export const AuthModal = ({ isOpen, onClose }) => {
-  const { login, register, verifyOtp, resendVerification } = useAuth();
+  const { login, register, verifyOtp, resendVerification, backendStatus } = useAuth();
   const { showToast } = useDrive();
 
   // Modes: 'login' | 'register' | 'otp' | 'success'
@@ -118,10 +118,14 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
       if (res.success) {
         setTargetEmail(res.email || normalizedEmail);
-        setCooldown(60);
+        setCooldown(res.cooldownSeconds || 60);
         setAuthMode('otp');
-        setSuccessInfo('Verification code dispatched! Please check your inbox.');
-        showToast('Verification email sent!', 'info');
+        setSuccessInfo(
+          res.alreadySent
+            ? res.message
+            : 'Verification code dispatched! Please check your inbox.'
+        );
+        showToast(res.alreadySent ? 'Please check your inbox for the verification code.' : 'Verification email sent!', 'info');
       } else {
         setError(res.error || 'Registration failed. Please try again.');
       }
@@ -264,6 +268,14 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
         {/* Form Body */}
         <div className="p-5 sm:p-6">
+          {/* Cloud backend cold-start notice */}
+          {backendStatus === 'waking' && (authMode === 'login' || authMode === 'register') && !error && (
+            <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+              <RefreshCw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 animate-spin" />
+              <span>Cloud server is waking up from idle (~20–45s). Feel free to submit — we will connect automatically.</span>
+            </div>
+          )}
+
           {/* Success Banner */}
           {successInfo && (
             <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-xs text-emerald-700 dark:text-emerald-300 flex items-start gap-2">

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { subscribeBackendStatus, waitForBackendAwake } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -21,8 +21,10 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [backendStatus, setBackendStatus] = useState('checking');
 
   useEffect(() => {
+    const unsubscribeStatus = subscribeBackendStatus(setBackendStatus);
     const handleAuthLogout = () => {
       setUser(null);
       setToken(null);
@@ -53,13 +55,16 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setToken(null);
         // Proactively wake sleeping cloud backend (Render free tier) on page load
-        api.get('/auth/health', { timeout: 90000 }).catch(() => {});
+        waitForBackendAwake();
       }
       setLoading(false);
     };
 
     checkAuth();
-    return () => window.removeEventListener('auth-logout', handleAuthLogout);
+    return () => {
+      unsubscribeStatus();
+      window.removeEventListener('auth-logout', handleAuthLogout);
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -106,6 +111,16 @@ export const AuthProvider = ({ children }) => {
         message: res.data?.message || 'Verification email sent. Please check your inbox.'
       };
     } catch (err) {
+      if (err.response?.status === 429 && err.response?.data?.requiresVerification) {
+        return {
+          success: true,
+          requiresVerification: true,
+          alreadySent: true,
+          cooldownSeconds: err.response.data.cooldownSeconds || 60,
+          email: err.response.data.email || email.trim().toLowerCase(),
+          message: err.response.data.message || 'Verification code was recently sent. Please check your inbox.'
+        };
+      }
       const message = extractErrorMessage(err, 'Registration failed. Please verify the information entered.');
       setError(message);
       return { success: false, error: message };
@@ -194,6 +209,7 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         error,
+        backendStatus,
         login,
         register,
         verifyOtp,
